@@ -12,7 +12,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import br.com.ufpb.mapSis.beans.Artigo;
+import br.com.ufpb.appsnaauthorrank.beans.Artigo;
 
 public class ParserXlsxScopus {
 

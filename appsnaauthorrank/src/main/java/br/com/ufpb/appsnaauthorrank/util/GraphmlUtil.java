@@ -5,9 +5,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
-import br.com.ufpb.appSNAUtil.model.beans.to.XmlTO;
+import br.com.ufpb.appsnaauthorrank.beans.to.XmlTO;
 
-public class XMLUtil {
+public class GraphmlUtil {
 
 	public static StringBuffer arquivo = new StringBuffer(
 			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append(
