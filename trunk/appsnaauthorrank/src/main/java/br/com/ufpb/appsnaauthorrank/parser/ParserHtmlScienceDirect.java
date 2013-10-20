@@ -8,7 +8,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import br.com.ufpb.mapSis.beans.Artigo;
+import br.com.ufpb.appsnaauthorrank.beans.Artigo;
 
 public class ParserHtmlScienceDirect {
 
