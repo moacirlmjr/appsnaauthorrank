@@ -1,12 +1,28 @@
 package br.com.ufpb.appsnaauthorrank.beans;
 
-public class Artigo {
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+
+public class Artigo extends EntityMaster {
 	private String titulo;
-	private String autores;
 	private String pubYear;
 	private String ondePub;
 	private String linkDownload;
+	private String linkDetalhe;
 	private String origem;
+	private String issn;
+
+	@ManyToMany(targetEntity = Autor.class, mappedBy = "artigos", cascade = CascadeType.ALL)
+	@JoinTable(name = "Artigo_Autores", joinColumns = @JoinColumn(name = "artigo_id"), inverseJoinColumns = @JoinColumn(name = "autor_id"))
+	private Set<Autor> autores;
+	
+	@ManyToMany(targetEntity = Pesquisa.class, mappedBy = "artigos", cascade = CascadeType.ALL)
+	private Set<Pesquisa> pesquisas;
 
 	public String getTitulo() {
 		return titulo;
@@ -14,14 +30,6 @@ public class Artigo {
 
 	public void setTitulo(String titulo) {
 		this.titulo = titulo;
-	}
-
-	public String getAutores() {
-		return autores;
-	}
-
-	public void setAutores(String autores) {
-		this.autores = autores;
 	}
 
 	public String getPubYear() {
