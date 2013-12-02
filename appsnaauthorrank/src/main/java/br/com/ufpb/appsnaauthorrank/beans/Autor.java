@@ -7,7 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 
 @Entity
-public class Autor extends EntityMaster {
+public class Autor extends EntityMaster implements Comparable<Autor> {
 
 	private String nome;
 	private String abreviacao;
@@ -39,5 +39,30 @@ public class Autor extends EntityMaster {
 	public void setHindex(Integer hindex) {
 		this.hindex = hindex;
 	}
+
+    @Override
+    public int hashCode() {
+        return this.getNome().hashCode();
+    }
+        
+        
+
+    @Override
+    public boolean equals(Object o) {
+        Autor autor = (Autor) o;
+        
+        if(this.getNome().equals(autor.getNome()))
+            return true;
+        else
+            return false;
+    }
+
+    @Override
+    public int compareTo(Autor t) {
+        return this.getNome().compareTo(t.getNome());
+    }
+        
+        
+        
 
 }
