@@ -20,10 +20,10 @@ public class ExecutarMappingIEEE {
         try {
             List<Artigo> artigos = new ArrayList<Artigo>();
             List<Artigo> tempArtigos = new ArrayList<Artigo>();
-            int contador = 629;
+            int contador = 1;
             
             while(tempArtigos != null){
-                tempArtigos = ParserHtmlIEEE.realizarParserHtml(postIeeeForm.post("social network",contador));
+                tempArtigos = ParserHtmlIEEE.realizarParserHtml(postIeeeForm.post("\"social network analysis\" and online",contador));
                 if(tempArtigos!=null)
                     artigos.addAll(tempArtigos);
                 contador++;

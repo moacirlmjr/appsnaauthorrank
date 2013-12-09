@@ -2,18 +2,12 @@ package br.com.ufpb.appsnaauthorrank.beans;
 
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.ManyToMany;
-
-@Entity
-public class Autor extends EntityMaster implements Comparable<Autor> {
+public class Autor implements Comparable<Autor> {
 
 	private String nome;
 	private String abreviacao;
 	private Integer hindex;
 
-	@ManyToMany(targetEntity = Artigo.class, mappedBy = "autores", cascade = CascadeType.ALL)
 	private Set<Artigo> artigos;
 
 	public String getNome() {
@@ -40,29 +34,32 @@ public class Autor extends EntityMaster implements Comparable<Autor> {
 		this.hindex = hindex;
 	}
 
-    @Override
-    public int hashCode() {
-        return this.getNome().hashCode();
-    }
-        
-        
+	public Set<Artigo> getArtigos() {
+		return artigos;
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        Autor autor = (Autor) o;
-        
-        if(this.getNome().equals(autor.getNome()))
-            return true;
-        else
-            return false;
-    }
+	public void setArtigos(Set<Artigo> artigos) {
+		this.artigos = artigos;
+	}
 
-    @Override
-    public int compareTo(Autor t) {
-        return this.getNome().compareTo(t.getNome());
-    }
-        
-        
-        
+	@Override
+	public int hashCode() {
+		return this.getNome().hashCode();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		Autor autor = (Autor) o;
+
+		if (this.getNome().equals(autor.getNome()))
+			return true;
+		else
+			return false;
+	}
+
+	@Override
+	public int compareTo(Autor t) {
+		return this.getNome().compareTo(t.getNome());
+	}
 
 }

@@ -6,7 +6,7 @@ public class UserTO {
 	private String Nome;
 	private String Screename;
 	private String Biografia;
-	private String Localização;
+	private String Localizacao;
 	private String TotalFollowers;
 	private String TotalFollowing;
 	private String TotalTweets;	
@@ -23,7 +23,7 @@ public class UserTO {
 	}
 
 	public UserTO(String id, String nome, String screename, String biografia,
-			String localização, String totalFollowers, String totalFollowing,
+			String localizacao, String totalFollowers, String totalFollowing,
 			String totalTweets, String uRL, String timeZone,
 			String linguagem, String dataDeCriacao, String uRLImage) {
 		super();
@@ -31,7 +31,7 @@ public class UserTO {
 		Nome = nome;
 		Screename = screename;
 		Biografia = biografia;
-		Localização = localização;
+		Localizacao = localizacao;
 		TotalFollowers = totalFollowers;
 		TotalFollowing = totalFollowing;
 		TotalTweets = totalTweets;		
@@ -75,12 +75,12 @@ public class UserTO {
 		Biografia = biografia;
 	}
 
-	public String getLocalização() {
-		return Localização;
+	public String getLocalizacao() {
+		return Localizacao;
 	}
 
-	public void setLocalização(String localização) {
-		this.Localização=localização;
+	public void setLocalizacao(String localizacao) {
+		this.Localizacao = localizacao;
 	}
 
 	public String getTotalFollowers() {

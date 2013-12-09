@@ -33,9 +33,9 @@ public class ParserHtmlScienceDirect {
 									artigo.setTitulo(children.getElementsByClass(
 									"cLink").text());
 									try{
-										artigo.setAutores(children.toString().split("\n")[13].split("<br />")[2]);
+//										artigo.setAutores(children.toString().split("\n")[13].split("<br />")[2]);
 									}catch (Exception e2) {
-										artigo.setAutores("Sem Autor");
+//										artigo.setAutores("Sem Autor");
 									}
 									int count = 1;
 									for(Element linkPdf : children.getElementsByAttributeValue("target", "newPdfWin")){
