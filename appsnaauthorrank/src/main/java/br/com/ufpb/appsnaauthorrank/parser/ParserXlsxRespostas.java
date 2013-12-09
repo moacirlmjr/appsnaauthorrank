@@ -31,8 +31,8 @@ public class ParserXlsxRespostas {
 					switch (cell.getCellType()) {
 					case Cell.CELL_TYPE_STRING:
 						if (cell.getColumnIndex() == 3) {
-							artigo.setAutores(cell
-											.getStringCellValue());
+//							artigo.setAutores(cell
+//											.getStringCellValue());
 						} else if (cell.getColumnIndex() == 1) {
 							artigo.setTitulo(cell.getStringCellValue());
 						} else if (cell.getColumnIndex() == 4) {

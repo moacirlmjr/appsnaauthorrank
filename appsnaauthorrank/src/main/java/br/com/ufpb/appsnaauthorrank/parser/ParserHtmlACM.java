@@ -42,8 +42,8 @@ public class ParserHtmlACM {
 							if (continuar) {
 								artigo.setTitulo(e.getElementsByClass(
 										"medium-text").text());
-								artigo.setAutores(e.getElementsByClass(
-										"authors").text());
+//								artigo.setAutores(e.getElementsByClass(
+//										"authors").text());
 								artigo.setOndePub(e.getElementsByClass(
 										"addinfo").text());
 								for (Element subChildren : e

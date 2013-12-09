@@ -33,7 +33,7 @@ public class ParserHtmlSpringer {
 										for(Element result : resultsList.children()){
 												Artigo artigo = new Artigo();
 												artigo.setTitulo(result.getElementsByAttributeValue("class", "title").text());
-												artigo.setAutores(result.getElementsByAttributeValue("class", "authors").text());
+//												artigo.setAutores(result.getElementsByAttributeValue("class", "authors").text());
 												artigo.setOndePub(result.getElementsByAttributeValue("class", "publication-title").text());
 												if(result.getElementsByAttributeValue("class", "year").attr("title").split(" ").length > 1){
 													artigo.setPubYear(result.getElementsByAttributeValue("class", "year").attr("title").split(" ")[1]);	
