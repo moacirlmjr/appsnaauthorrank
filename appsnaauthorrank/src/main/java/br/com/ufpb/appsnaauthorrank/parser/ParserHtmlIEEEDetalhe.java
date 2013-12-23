@@ -1,16 +1,23 @@
 package br.com.ufpb.appsnaauthorrank.parser;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.regex.Pattern;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import br.com.ufpb.appsnaauthorrank.beans.Artigo;
 import br.com.ufpb.appsnaauthorrank.beans.Autor;
+import br.com.ufpb.appsnaauthorrank.post.PostFreeCityApi;
 import br.com.ufpb.appsnaauthorrank.post.postIeeeForm;
 
 public class ParserHtmlIEEEDetalhe {
@@ -41,7 +48,6 @@ public class ParserHtmlIEEEDetalhe {
 				}
 
 			}
-			System.out.println();
 			String urlReferencias = artigo.getLinkDetalhe().replace(
 					"articleDetails", "abstractReferences");
 			String pagina = postIeeeForm.obterPagina(URL_IEEE + urlReferencias);
@@ -51,55 +57,71 @@ public class ParserHtmlIEEEDetalhe {
 					try {
 						Artigo a = new Artigo();
 						a.setAutores(new HashSet<Autor>());
-						String articleValues[] = e.text()
-								.replace(" by et al", "").split("\"");
-//						if(articleValues.length > 1){
-							String autores[] = articleValues[0].split(" and ");
-							
-							Autor author = new Autor();
-							if (autores.length > 1) {
-								if (Pattern.compile(".*[0-9].*")
-										.matcher(autores[1]).matches()) {
-									autores[1] = autores[1].replaceAll("[\\d].*",
-											"");
-									author.setNome(autores[1].substring(0,
-											autores[1].length() - 2));
-								} else {
-									author.setNome(autores[1].replace(",", ""));
-								}
-								a.getAutores().add(author);
+						if (!e.text().contains("http")) {
+							DocumentBuilderFactory dbf = DocumentBuilderFactory
+									.newInstance();
+							dbf.setNamespaceAware(false);
+							DocumentBuilder docBuilder = dbf
+									.newDocumentBuilder();
+							String retorno = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+									+ PostFreeCityApi
+											.postCitationApi(e
+													.text()
+													.split("  Abstract | Full Text: PDF")[0]
+													.replace("[CrossRef]", ""));
+							InputSource inStream = new InputSource(
+									new ByteArrayInputStream(
+											retorno.getBytes("UTF-8")));
+							org.w3c.dom.Document docXml = docBuilder
+									.parse(inStream);
+							NodeList autores = docXml
+									.getElementsByTagName("author");
+							for (int i = 0; i < autores.getLength(); i++) {
+								Node autorNode = autores.item(i);
+								Autor autor = new Autor();
+								autor.setNome(autorNode.getTextContent());
+								a.getAutores().add(autor);
 							}
-							
-							String divisaoAutor2[] = autores[0].split("\\.\\,");
-							if (divisaoAutor2.length > 1) {
-								for (String autor : divisaoAutor2) {
-									author = new Autor();
-									author.setNome(autor.replace("\\.\\,", ""));
-									a.getAutores().add(author);
-								}
-							} else {
-								author = new Autor();
-								author.setNome(autores[0].replace("\\.\\,", ""));
-								a.getAutores().add(author);
+							if (docXml.getElementsByTagName("title").item(0) != null) {
+								a.setTitulo(docXml
+										.getElementsByTagName("title").item(0)
+										.getTextContent());
+							} else if (docXml.getElementsByTagName("booktitle")
+									.item(0) != null) {
+								a.setTitulo(docXml
+										.getElementsByTagName("booktitle")
+										.item(0).getTextContent());
 							}
-							
-							a.setTitulo(articleValues[1]);
-							if (articleValues[2].split(",")[0].equals("")) {
-								a.setOndePub(articleValues[2].split(",")[1]);
-							} else {
-								a.setOndePub(articleValues[2].split(",")[0]);
+
+							if (docXml.getElementsByTagName("journal").item(0) != null) {
+								a.setOndePub(docXml
+										.getElementsByTagName("journal")
+										.item(0).getTextContent());
+							} else if (docXml.getElementsByTagName("publisher")
+									.item(0) != null) {
+								a.setOndePub(docXml
+										.getElementsByTagName("publisher")
+										.item(0).getTextContent());
 							}
-//						}else{
-							 e.text().split("[\\d\\.,*],");
-//						}
+
+							if (docXml.getElementsByTagName("year").item(0) != null) {
+								a.setPubYear(docXml
+										.getElementsByTagName("year").item(0)
+										.getTextContent());
+							} 
+						} else {
+							a.setTitulo(e.text());
+						}
+						referencias.add(a);
 					} catch (Exception e2) {
+						e2.printStackTrace();
 						System.out.println(e.text());
 					}
 				}
+				artigo.setReferencia(new HashSet<Artigo>(referencias));
 			}
 		}
 
 		return artigo;
 	}
-
 }
