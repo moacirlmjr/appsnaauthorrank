@@ -34,14 +34,15 @@ public class GerarGraphMLIEEE {
 
 			// obter as referencias e atualizar artigos
 			for (Artigo a : artigos) {
-				a = ParserHtmlIEEEDetalhe.realizarParserHtml(a);
+				if (a.getTitulo() != null)
+					a = ParserHtmlIEEEDetalhe.realizarParserHtml(a);
 				System.out.println(a.getTitulo());
 			}
 
 			criaCabecalho(true);
 			criarNodos(artigos);
 			criarArestas(artigos);
-			criaArquivo("GrafoDeArtigos.graphml");
+			criaArquivo("GrafoDeArtigos2.graphml");
 			salvarArquivo("");
 
 			System.out.println("Quantidade de artigos: " + artigos.size());
@@ -65,15 +66,21 @@ public class GerarGraphMLIEEE {
 	private static void criarNodos(List<Artigo> list) throws Exception {
 
 		XMLUtil.addSpace(2);
-		MyNode n1 = null;
-
 		List<String> listaNodes = new ArrayList<String>();
 		for (Artigo paper : list) {
 			if (verificar(paper.getTitulo(), listaNodes)) {
-				n1 = new MyNode();
-				n1.setNome(paper.getTitulo());
 				XMLUtil.generateNodes(paper.getTitulo());
 				listaNodes.add(paper.getTitulo());
+			}
+
+			if (paper.getReferencia() != null) {
+				for (Artigo referencia : paper.getReferencia()) {
+					if (verificar(referencia.getTitulo(), listaNodes)) {
+						if (referencia.getTitulo() != null) {
+							XMLUtil.generateNodes(referencia.getTitulo());
+						}
+					}
+				}
 			}
 		}
 	}
@@ -83,10 +90,12 @@ public class GerarGraphMLIEEE {
 		XMLUtil.addSpace(2);
 
 		for (Artigo paper : list) {
-			if(paper.getReferencia() != null && paper.getTitulo() != null){
+			if (paper.getReferencia() != null && paper.getTitulo() != null) {
 				for (Artigo referencia : paper.getReferencia()) {
-					XMLUtil.generateEdges(referencia.getTitulo(),
-							paper.getTitulo(), 1);
+					if (referencia.getTitulo() != null) {
+						XMLUtil.generateEdges(referencia.getTitulo(),
+								paper.getTitulo(), 1);
+					}
 				}
 			}
 		}
