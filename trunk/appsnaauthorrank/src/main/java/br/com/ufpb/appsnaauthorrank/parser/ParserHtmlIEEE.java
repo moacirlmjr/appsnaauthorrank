@@ -43,7 +43,7 @@ public class ParserHtmlIEEE {
 					Element H3 = detail.getElementsByTag("h3").first();
 					if (H3.getElementsByTag("a").first() != null) {
 						artigo.setTitulo(H3.getElementsByTag("a").first()
-								.text());
+								.text().replace("\"", "").replace("&", ""));
 					} else {
 						artigo.setTitulo(H3.text());
 					}
