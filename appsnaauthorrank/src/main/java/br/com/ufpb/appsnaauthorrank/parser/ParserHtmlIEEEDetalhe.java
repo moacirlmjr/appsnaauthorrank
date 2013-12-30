@@ -1,24 +1,21 @@
 package br.com.ufpb.appsnaauthorrank.parser;
 
-import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
+import org.jsoup.select.Elements;
 
 import br.com.ufpb.appsnaauthorrank.beans.Artigo;
 import br.com.ufpb.appsnaauthorrank.beans.Autor;
-import br.com.ufpb.appsnaauthorrank.post.PostFreeCityApi;
 import br.com.ufpb.appsnaauthorrank.post.postIeeeForm;
+import br.com.ufpb.appsnaauthorrank.thread.ThreadGetReferencia;
 
 public class ParserHtmlIEEEDetalhe {
 
@@ -26,97 +23,76 @@ public class ParserHtmlIEEEDetalhe {
 	private static final String DOCS = "docs";
 	private static final String URL_IEEE = "http://ieeexplore.ieee.org";
 
-	public static Artigo realizarParserHtml(Artigo artigo) throws Exception {
+	private static final int QTE_THREADS_EXEC = 20;
+	private static final int ACTIVES_TASK = 2;
+	private static final int NTHREADS = Runtime.getRuntime()
+			.availableProcessors() * 4;
+	private static final ExecutorService exec = Executors
+			.newFixedThreadPool(NTHREADS);
 
+	public synchronized static Artigo realizarParserHtml(Artigo artigo) throws Exception {
+		
 		List<Artigo> referencias = new ArrayList<Artigo>();
-
+		artigo.setTitulo(artigo.getTitulo().replace("&", "and").replaceAll("\"", ""));
 		if (artigo.getLinkDetalhe() != null) {
-			Document doc = Jsoup.parse(postIeeeForm.obterPagina(URL_IEEE
-					+ artigo.getLinkDetalhe()));
+			Document doc = null;
+			try {
+				doc = Jsoup.parse(postIeeeForm.obterPagina(URL_IEEE
+						+ artigo.getLinkDetalhe()));
 
-			if (!doc.getElementsByClass(AUTHOR).isEmpty()) {
-				Element divAuthor = doc.getElementsByClass(AUTHOR).first();
-				for (Element e : divAuthor
-						.select(".authorPreferredName, .prefNameLink")) {
-					Autor autor = new Autor();
-					autor.setNome(e.text().trim());
-					if (!artigo.getAutores().contains(autor)) {
-						artigo.getAutores().add(autor);
-						System.out.println("autor add: " + autor.getNome());
-						System.out.println("do titulo: " + artigo.getTitulo());
+				if (!doc.getElementsByClass(AUTHOR).isEmpty()) {
+					Element divAuthor = doc.getElementsByClass(AUTHOR).first();
+					for (Element e : divAuthor
+							.select(".authorPreferredName, .prefNameLink")) {
+						Autor autor = new Autor();
+						autor.setNome(e.text().trim());
+						if (!artigo.getAutores().contains(autor)) {
+							artigo.getAutores().add(autor);
+							System.out.println("autor add: " + autor.getNome());
+							System.out.println("do titulo: "
+									+ artigo.getTitulo());
+						}
 					}
-				}
 
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
+
 			String urlReferencias = artigo.getLinkDetalhe().replace(
 					"articleDetails", "abstractReferences");
 			String pagina = postIeeeForm.obterPagina(URL_IEEE + urlReferencias);
 			doc = Jsoup.parse(pagina);
+
 			if (!doc.select(".docs").isEmpty()) {
-				for (Element e : doc.select(".docs li")) {
-					try {
-						Artigo a = new Artigo();
-						a.setAutores(new HashSet<Autor>());
-						if (!e.text().contains("http")) {
-							DocumentBuilderFactory dbf = DocumentBuilderFactory
-									.newInstance();
-							dbf.setNamespaceAware(false);
-							DocumentBuilder docBuilder = dbf
-									.newDocumentBuilder();
-							String retorno = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
-									+ PostFreeCityApi
-											.postCitationApi(e
-													.text()
-													.split("  Abstract | Full Text: PDF")[0]
-													.replace("[CrossRef]", ""));
-							InputSource inStream = new InputSource(
-									new ByteArrayInputStream(
-											retorno.getBytes("UTF-8")));
-							org.w3c.dom.Document docXml = docBuilder
-									.parse(inStream);
-							NodeList autores = docXml
-									.getElementsByTagName("author");
-							for (int i = 0; i < autores.getLength(); i++) {
-								Node autorNode = autores.item(i);
-								Autor autor = new Autor();
-								autor.setNome(autorNode.getTextContent());
-								a.getAutores().add(autor);
-							}
-							if (docXml.getElementsByTagName("title").item(0) != null) {
-								a.setTitulo(docXml
-										.getElementsByTagName("title").item(0)
-										.getTextContent());
-							} else if (docXml.getElementsByTagName("booktitle")
-									.item(0) != null) {
-								a.setTitulo(docXml
-										.getElementsByTagName("booktitle")
-										.item(0).getTextContent());
-							}
+				List<Future<Artigo>> listArtigoTratadas = new ArrayList<Future<Artigo>>();
+				int count = 0;
+				if(artigo.getTitulo().equals("Finding Influential eBay Buyers for Viral Marketing A Conceptual Model of BuyerRank")){
+					System.out.println();
+				}
+				Elements elements = doc.select(".docs li");
+				for (Element e : elements) {
 
-							if (docXml.getElementsByTagName("journal").item(0) != null) {
-								a.setOndePub(docXml
-										.getElementsByTagName("journal")
-										.item(0).getTextContent());
-							} else if (docXml.getElementsByTagName("publisher")
-									.item(0) != null) {
-								a.setOndePub(docXml
-										.getElementsByTagName("publisher")
-										.item(0).getTextContent());
-							}
+					ThreadGetReferencia t = new ThreadGetReferencia();
+					t.setE(e);
+					Future<Artigo> artigoTratada = exec.submit(t);
+					listArtigoTratadas.add(artigoTratada);
 
-							if (docXml.getElementsByTagName("year").item(0) != null) {
-								a.setPubYear(docXml
-										.getElementsByTagName("year").item(0)
-										.getTextContent());
-							} 
-						} else {
-							a.setTitulo(e.text());
+					if ((count != 0 && count % QTE_THREADS_EXEC == 0)
+							|| (elements.size() < QTE_THREADS_EXEC
+									&& count != 0 && count
+									% (elements.size() - 1) == 0)
+							|| (elements.size()) == (count + 1)) {
+						while (getQteThreadsRunning() != 0) {
+							Thread.sleep(100);
 						}
-						referencias.add(a);
-					} catch (Exception e2) {
-						e2.printStackTrace();
-						System.out.println(e.text());
+
+						for (Future<Artigo> future : listArtigoTratadas) {
+							referencias.add(future.get());
+						}
 					}
+					count++;
+
 				}
 				artigo.setReferencia(new HashSet<Artigo>(referencias));
 			}
@@ -124,4 +100,10 @@ public class ParserHtmlIEEEDetalhe {
 
 		return artigo;
 	}
+
+	private static Integer getQteThreadsRunning() {
+		return Integer.parseInt(exec.toString().split(",")[ACTIVES_TASK]
+				.split("=")[1].replace(" ", ""));
+	}
+
 }
