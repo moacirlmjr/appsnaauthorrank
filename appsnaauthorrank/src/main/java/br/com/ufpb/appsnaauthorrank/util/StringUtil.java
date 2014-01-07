@@ -16,5 +16,12 @@ public class StringUtil {
 		return true;
 		
 	}
+	
+	public static String tratarCitacao(String citacao){
+		return citacao.split(
+				"  Abstract | Full Text: PDF")[0]
+				.replace("[CrossRef]", "").replace("<", "")
+				.replace(">", "").replace(", (unpublished)", "");
+	}
 
 }
