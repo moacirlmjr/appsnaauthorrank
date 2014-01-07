@@ -30,71 +30,53 @@ public class ParserHtmlIEEEDetalhe {
 	private static final ExecutorService exec = Executors
 			.newFixedThreadPool(NTHREADS);
 
-	public synchronized static Artigo realizarParserHtml(Artigo artigo) throws Exception {
-		
+	public synchronized static Artigo realizarParserHtml(Artigo artigo)
+			throws Exception {
+
 		List<Artigo> referencias = new ArrayList<Artigo>();
-		artigo.setTitulo(artigo.getTitulo().replace("&", "and").replaceAll("\"", ""));
+		artigo.setTitulo(artigo.getTitulo().replace("&", "and")
+				.replaceAll("\"", ""));
 		if (artigo.getLinkDetalhe() != null) {
 			Document doc = null;
+			
 			try {
-				doc = Jsoup.parse(postIeeeForm.obterPagina(URL_IEEE
-						+ artigo.getLinkDetalhe()));
+				String urlReferencias = artigo.getLinkDetalhe().replace(
+						"articleDetails", "abstractReferences");
+				String pagina = postIeeeForm.obterPagina(URL_IEEE
+						+ urlReferencias);
+				doc = Jsoup.parse(pagina);
 
-				if (!doc.getElementsByClass(AUTHOR).isEmpty()) {
-					Element divAuthor = doc.getElementsByClass(AUTHOR).first();
-					for (Element e : divAuthor
-							.select(".authorPreferredName, .prefNameLink")) {
-						Autor autor = new Autor();
-						autor.setNome(e.text().trim());
-						if (!artigo.getAutores().contains(autor)) {
-							artigo.getAutores().add(autor);
-							System.out.println("autor add: " + autor.getNome());
-							System.out.println("do titulo: "
-									+ artigo.getTitulo());
+				if (!doc.select(".docs").isEmpty()) {
+					List<Future<Artigo>> listArtigoTratadas = new ArrayList<Future<Artigo>>();
+					int count = 0;
+					Elements elements = doc.select(".docs li");
+					for (Element e : elements) {
+
+						ThreadGetReferencia t = new ThreadGetReferencia();
+						t.setE(e);
+						Future<Artigo> artigoTratada = exec.submit(t);
+						listArtigoTratadas.add(artigoTratada);
+
+						if ((count != 0 && count % QTE_THREADS_EXEC == 0)
+								|| (elements.size() < QTE_THREADS_EXEC
+										&& count != 0 && count
+										% (elements.size() - 1) == 0)
+								|| (elements.size()) == (count + 1)) {
+							while (getQteThreadsRunning() != 0) {
+								Thread.sleep(100);
+							}
+
+							for (Future<Artigo> future : listArtigoTratadas) {
+								referencias.add(future.get());
+							}
 						}
-					}
+						count++;
 
+					}
+					artigo.setReferencia(new HashSet<Artigo>(referencias));
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-			}
-
-			String urlReferencias = artigo.getLinkDetalhe().replace(
-					"articleDetails", "abstractReferences");
-			String pagina = postIeeeForm.obterPagina(URL_IEEE + urlReferencias);
-			doc = Jsoup.parse(pagina);
-
-			if (!doc.select(".docs").isEmpty()) {
-				List<Future<Artigo>> listArtigoTratadas = new ArrayList<Future<Artigo>>();
-				int count = 0;
-				if(artigo.getTitulo().equals("Finding Influential eBay Buyers for Viral Marketing A Conceptual Model of BuyerRank")){
-					System.out.println();
-				}
-				Elements elements = doc.select(".docs li");
-				for (Element e : elements) {
-
-					ThreadGetReferencia t = new ThreadGetReferencia();
-					t.setE(e);
-					Future<Artigo> artigoTratada = exec.submit(t);
-					listArtigoTratadas.add(artigoTratada);
-
-					if ((count != 0 && count % QTE_THREADS_EXEC == 0)
-							|| (elements.size() < QTE_THREADS_EXEC
-									&& count != 0 && count
-									% (elements.size() - 1) == 0)
-							|| (elements.size()) == (count + 1)) {
-						while (getQteThreadsRunning() != 0) {
-							Thread.sleep(100);
-						}
-
-						for (Future<Artigo> future : listArtigoTratadas) {
-							referencias.add(future.get());
-						}
-					}
-					count++;
-
-				}
-				artigo.setReferencia(new HashSet<Artigo>(referencias));
 			}
 		}
 

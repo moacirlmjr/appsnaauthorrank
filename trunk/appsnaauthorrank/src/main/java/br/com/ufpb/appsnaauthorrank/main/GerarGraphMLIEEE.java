@@ -2,9 +2,10 @@ package br.com.ufpb.appsnaauthorrank.main;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import br.com.ufpb.appsnaauthorrank.beans.Artigo;
-import br.com.ufpb.appsnaauthorrank.beans.MyNode;
+import br.com.ufpb.appsnaauthorrank.beans.Autor;
 import br.com.ufpb.appsnaauthorrank.beans.to.XmlTO;
 import br.com.ufpb.appsnaauthorrank.enumeration.TypeEnum;
 import br.com.ufpb.appsnaauthorrank.parser.ParserHtmlIEEE;
@@ -30,6 +31,7 @@ public class GerarGraphMLIEEE {
 				if (tempArtigos != null)
 					artigos.addAll(tempArtigos);
 				contador++;
+					
 			}
 
 			// obter as referencias e atualizar artigos
@@ -39,10 +41,16 @@ public class GerarGraphMLIEEE {
 				System.out.println(a.getTitulo());
 			}
 
+//			criaCabecalho(true);
+//			criarNodosArtigo(artigos);
+//			criarArestasArtigo(artigos);
+//			criaArquivo("GrafoDeArtigos2.graphml");
+//			salvarArquivo("");
+
 			criaCabecalho(true);
-			criarNodos(artigos);
-			criarArestas(artigos);
-			criaArquivo("GrafoDeArtigos2.graphml");
+			criarNodosAutor(artigos);
+			criarArestasAutor(artigos);
+			criaArquivo("GrafoDeAutores2.graphml");
 			salvarArquivo("");
 
 			System.out.println("Quantidade de artigos: " + artigos.size());
@@ -63,7 +71,7 @@ public class GerarGraphMLIEEE {
 		XMLUtil.generateHeader(listaTO, direcionado);
 	}
 
-	private static void criarNodos(List<Artigo> list) throws Exception {
+	private static void criarNodosArtigo(List<Artigo> list) throws Exception {
 
 		XMLUtil.addSpace(2);
 		List<String> listaNodes = new ArrayList<String>();
@@ -75,8 +83,8 @@ public class GerarGraphMLIEEE {
 
 			if (paper.getReferencia() != null) {
 				for (Artigo referencia : paper.getReferencia()) {
-					if (verificar(referencia.getTitulo(), listaNodes)) {
-						if (referencia.getTitulo() != null) {
+					if (referencia.getTitulo() != null) {
+						if (verificar(referencia.getTitulo(), listaNodes)) {
 							XMLUtil.generateNodes(referencia.getTitulo());
 						}
 					}
@@ -85,7 +93,7 @@ public class GerarGraphMLIEEE {
 		}
 	}
 
-	private static void criarArestas(List<Artigo> list) throws Exception {
+	private static void criarArestasArtigo(List<Artigo> list) throws Exception {
 
 		XMLUtil.addSpace(2);
 
@@ -93,8 +101,80 @@ public class GerarGraphMLIEEE {
 			if (paper.getReferencia() != null && paper.getTitulo() != null) {
 				for (Artigo referencia : paper.getReferencia()) {
 					if (referencia.getTitulo() != null) {
-						XMLUtil.generateEdges(referencia.getTitulo(),
-								paper.getTitulo(), 1);
+						XMLUtil.generateEdges(paper.getTitulo(),
+								referencia.getTitulo(), 1);
+					}
+				}
+			}
+		}
+
+	}
+
+	private static void criarNodosAutor(List<Artigo> list) throws Exception {
+
+		XMLUtil.addSpace(2);
+		List<String> listaNodes = new ArrayList<String>();
+		for (Artigo paper : list) {
+			if (paper.getAutores() != null) {
+				for (Autor autor : paper.getAutores()) {
+					if (verificar(autor.getNome(), listaNodes)) {
+						XMLUtil.generateNodes(autor.getNome());
+						listaNodes.add(autor.getNome());
+					}
+
+				}
+			}
+
+			if (paper.getReferencia() != null) {
+				for (Artigo referencia : paper.getReferencia()) {
+					if (referencia.getAutores() != null) {
+						for (Autor autor : referencia.getAutores()) {
+							if (verificar(autor.getNome(), listaNodes)) {
+								XMLUtil.generateNodes(autor.getNome());
+								listaNodes.add(autor.getNome());
+							}
+
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private static void criarArestasAutor(List<Artigo> list) throws Exception {
+
+		XMLUtil.addSpace(2);
+
+		for (Artigo paper : list) {
+			if (paper.getAutores() != null) {
+				for (Autor a : paper.getAutores()) {
+					for (Autor a2 : paper.getAutores()) {
+						if (a.getNome() != null
+								&& !a.getNome().equals(a2.getNome())) {
+							XMLUtil.generateEdges(a.getNome(), a2.getNome(), 1);
+						}
+					}
+				}
+			}
+
+			if (paper.getReferencia() != null) {
+				for (Artigo referencia : paper.getReferencia()) {
+					if (referencia.getAutores() != null
+							&& paper.getAutores() != null) {
+						for (Autor a : paper.getAutores()) {
+							if (verificarAutor(a.getNome(),
+									referencia.getAutores())) {
+								for (Autor a2 : referencia.getAutores()) {
+									if (a.getNome() != null
+											&& a2.getNome() != null
+											&& !a.getNome()
+													.equals(a2.getNome())) {
+										XMLUtil.generateEdges(a.getNome(),
+												a2.getNome(), 1);
+									}
+								}
+							}
+						}
 					}
 				}
 			}
@@ -110,6 +190,15 @@ public class GerarGraphMLIEEE {
 
 	private static void salvarArquivo(String path) {
 		XMLUtil.salvarXML(path);
+	}
+
+	private static boolean verificarAutor(String autor, Set<Autor> set) {
+		for (Autor a2 : set) {
+			if (a2.getNome() != null && !autor.equals(a2.getNome())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static boolean verificar(String id, List<String> lista) {
