@@ -56,9 +56,10 @@ public class ParserHtmlIEEE {
 								.select(".authorPreferredName, .prefNameLink")) {
 							Autor autor = new Autor();
 							String avetor[] = autores.text().trim().split(",");
-							if(avetor.length > 1){
-								autor.setNome(avetor[1] + avetor[0]);
-							}else{
+							if (avetor.length > 1) {
+								autor.setNome(avetor[1].replace(" ", "")
+										.replace("\\.", "") + " " + avetor[0]);
+							} else {
 								autor.setNome(autores.text().trim());
 							}
 							artigo.getAutores().add(autor);

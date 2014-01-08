@@ -31,28 +31,35 @@ public class GerarGraphMLIEEE {
 				if (tempArtigos != null)
 					artigos.addAll(tempArtigos);
 				contador++;
-					
+
 			}
 
 			// obter as referencias e atualizar artigos
 			for (Artigo a : artigos) {
+				System.out.println(a.getTitulo());
 				if (a.getTitulo() != null)
 					a = ParserHtmlIEEEDetalhe.realizarParserHtml(a);
-				System.out.println(a.getTitulo());
 			}
 
-//			criaCabecalho(true);
-//			criarNodosArtigo(artigos);
-//			criarArestasArtigo(artigos);
-//			criaArquivo("GrafoDeArtigos2.graphml");
-//			salvarArquivo("");
-
-			criaCabecalho(true);
-			criarNodosAutor(artigos);
-			criarArestasAutor(artigos);
-			criaArquivo("GrafoDeAutores2.graphml");
-			salvarArquivo("");
-
+//			try {
+//				criaCabecalho(true);
+//				criarNodosArtigo(artigos);
+//				criarArestasArtigo(artigos);
+//				criaArquivo("GrafoDeArtigos2.graphml");
+//				salvarArquivo("");
+//			} catch (Exception ex) {
+//				ex.printStackTrace();
+//			}
+			
+			try {
+				criaCabecalho(true);
+				criarNodosAutor(artigos);
+				criarArestasAutor(artigos);
+				criaArquivo("GrafoDeAutores2.graphml");
+				salvarArquivo("");
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
 			System.out.println("Quantidade de artigos: " + artigos.size());
 
 		} catch (Exception ex) {
@@ -150,7 +157,9 @@ public class GerarGraphMLIEEE {
 				for (Autor a : paper.getAutores()) {
 					for (Autor a2 : paper.getAutores()) {
 						if (a.getNome() != null
-								&& !a.getNome().equals(a2.getNome())) {
+								&& !a.getNome().equals(a2.getNome())
+								&& a2.getNome() != null
+								&& !a2.getNome().equals("")) {
 							XMLUtil.generateEdges(a.getNome(), a2.getNome(), 1);
 						}
 					}
@@ -167,6 +176,7 @@ public class GerarGraphMLIEEE {
 								for (Autor a2 : referencia.getAutores()) {
 									if (a.getNome() != null
 											&& a2.getNome() != null
+											&& !a2.getNome().equals("")
 											&& !a.getNome()
 													.equals(a2.getNome())) {
 										XMLUtil.generateEdges(a.getNome(),
