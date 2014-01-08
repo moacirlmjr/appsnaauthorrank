@@ -9,6 +9,8 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.com.ufpb.appsnaauthorrank.util.StringUtil;
+
 
 public class PostFreeCityApi {
 
@@ -59,7 +61,7 @@ public class PostFreeCityApi {
 
 		String urlParameters = "";
 		for(String citation : citations){
-			urlParameters+= "citation[]=" +  URLEncoder.encode(citation, "UTF-8") + "&";
+			urlParameters+= "citation[]=" +  URLEncoder.encode(StringUtil.tratarCitacao(citation), "UTF-8") + "&";
 		}
 
 		// Send post request

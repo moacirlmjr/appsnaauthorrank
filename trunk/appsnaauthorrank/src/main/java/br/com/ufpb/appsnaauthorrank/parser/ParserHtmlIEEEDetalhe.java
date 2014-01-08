@@ -1,5 +1,6 @@
 package br.com.ufpb.appsnaauthorrank.parser;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -7,28 +8,29 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import br.com.ufpb.appsnaauthorrank.beans.Artigo;
 import br.com.ufpb.appsnaauthorrank.beans.Autor;
+import br.com.ufpb.appsnaauthorrank.post.PostFreeCityApi;
 import br.com.ufpb.appsnaauthorrank.post.postIeeeForm;
 import br.com.ufpb.appsnaauthorrank.thread.ThreadGetReferencia;
+import br.com.ufpb.appsnaauthorrank.util.StringUtil;
 
 public class ParserHtmlIEEEDetalhe {
 
 	private static final String AUTHOR = "authors";
 	private static final String DOCS = "docs";
 	private static final String URL_IEEE = "http://ieeexplore.ieee.org";
-
-	private static final int QTE_THREADS_EXEC = 20;
-	private static final int ACTIVES_TASK = 2;
-	private static final int NTHREADS = Runtime.getRuntime()
-			.availableProcessors() * 4;
-	private static final ExecutorService exec = Executors
-			.newFixedThreadPool(NTHREADS);
 
 	public synchronized static Artigo realizarParserHtml(Artigo artigo)
 			throws Exception {
@@ -38,7 +40,7 @@ public class ParserHtmlIEEEDetalhe {
 				.replaceAll("\"", ""));
 		if (artigo.getLinkDetalhe() != null) {
 			Document doc = null;
-			
+
 			try {
 				String urlReferencias = artigo.getLinkDetalhe().replace(
 						"articleDetails", "abstractReferences");
@@ -47,29 +49,81 @@ public class ParserHtmlIEEEDetalhe {
 				doc = Jsoup.parse(pagina);
 
 				if (!doc.select(".docs").isEmpty()) {
-					List<Future<Artigo>> listArtigoTratadas = new ArrayList<Future<Artigo>>();
 					int count = 0;
 					Elements elements = doc.select(".docs li");
-					for (Element e : elements) {
-
-						ThreadGetReferencia t = new ThreadGetReferencia();
-						t.setE(e);
-						Future<Artigo> artigoTratada = exec.submit(t);
-						listArtigoTratadas.add(artigoTratada);
-
-						if ((count != 0 && count % QTE_THREADS_EXEC == 0)
-								|| (elements.size() < QTE_THREADS_EXEC
-										&& count != 0 && count
+					List<String> referenciasString = new ArrayList<>();
+					for (Element referencia : elements) {
+						referenciasString.add(referencia.text());
+						if ((count != 0 && count % 20 == 0)
+								|| (elements.size() < 20 && count != 0 && count
 										% (elements.size() - 1) == 0)
 								|| (elements.size()) == (count + 1)) {
-							while (getQteThreadsRunning() != 0) {
-								Thread.sleep(100);
+
+							DocumentBuilderFactory dbf = DocumentBuilderFactory
+									.newInstance();
+							dbf.setNamespaceAware(false);
+							DocumentBuilder docBuilder = dbf
+									.newDocumentBuilder();
+							String retorno = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+									+ PostFreeCityApi
+											.postCitationApi(referenciasString);
+							InputSource inStream = new InputSource(
+									new ByteArrayInputStream(
+											retorno.getBytes("UTF-8")));
+							org.w3c.dom.Document docXml = docBuilder
+									.parse(inStream);
+							for (int i = 0; i < docXml.getElementsByTagName(
+									"citation").getLength(); i++) {
+								Artigo a = new Artigo();
+								a.setAutores(new HashSet<Autor>());
+
+								NodeList childsCitation = docXml
+										.getElementsByTagName("citation")
+										.item(i).getChildNodes();
+
+								for (int h = 0; h < childsCitation.getLength(); h++) {
+									Node no = childsCitation.item(h);
+
+									if (no.getNodeName().equals("authors")) {
+										for (int j = 0; j < no.getChildNodes()
+												.getLength(); j++) {
+											Node autorNode = no.getChildNodes()
+													.item(j);
+											Autor autor = new Autor();
+											autor.setNome(autorNode
+													.getTextContent().replaceAll("&", ""));
+											a.getAutores().add(autor);
+										}
+									} else if (no.getNodeName().equals("title")) {
+										a.setTitulo(no.getTextContent()
+												.replace("&", "and")
+												.replaceAll("\"", ""));
+									} else if (no.getNodeName().equals(
+											"booktitle")) {
+										a.setTitulo(no.getTextContent()
+												.replace("&", "and")
+												.replaceAll("\"", ""));
+									} else if (no.getNodeName().equals(
+											"journal")) {
+										a.setOndePub(no.getTextContent()
+												.replace("&", "and")
+												.replaceAll("\"", ""));
+									} else if (no.getNodeName().equals(
+											"publisher")) {
+										a.setOndePub(no.getTextContent()
+												.replace("&", "and")
+												.replaceAll("\"", ""));
+									} else if (no.getNodeName().equals("year")) {
+										a.setPubYear(no.getTextContent());
+									}
+								}
+
+								referencias.add(a);
 							}
 
-							for (Future<Artigo> future : listArtigoTratadas) {
-								referencias.add(future.get());
-							}
+							referenciasString.clear();
 						}
+
 						count++;
 
 					}
@@ -81,11 +135,6 @@ public class ParserHtmlIEEEDetalhe {
 		}
 
 		return artigo;
-	}
-
-	private static Integer getQteThreadsRunning() {
-		return Integer.parseInt(exec.toString().split(",")[ACTIVES_TASK]
-				.split("=")[1].replace(" ", ""));
 	}
 
 }
