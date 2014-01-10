@@ -1,8 +1,13 @@
 package br.com.ufpb.appsnaauthorrank.main;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import br.com.ufpb.appsnaauthorrank.beans.Artigo;
 import br.com.ufpb.appsnaauthorrank.beans.Autor;
@@ -41,25 +46,71 @@ public class GerarGraphMLIEEE {
 					a = ParserHtmlIEEEDetalhe.realizarParserHtml(a);
 			}
 
-//			try {
-//				criaCabecalho(true);
-//				criarNodosArtigo(artigos);
-//				criarArestasArtigo(artigos);
-//				criaArquivo("GrafoDeArtigos2.graphml");
-//				salvarArquivo("");
-//			} catch (Exception ex) {
-//				ex.printStackTrace();
-//			}
+			// ranking dos meios de publicação mais relevantes
+			Map<String, Integer> rankingMeiosPublicacao = new HashMap<>();
+			List<String> listaArtigosVistos = new LinkedList<>();
+			for (Artigo a : artigos) {
+				if (a.getOndePub() != null && !a.getOndePub().equals("")
+						&& a.getTitulo() != null && !a.getTitulo().equals("")) {
+					if (rankingMeiosPublicacao.containsKey(a.getOndePub())
+							&& !listaArtigosVistos.contains(a.getTitulo())) {
+						Integer contagem = rankingMeiosPublicacao.get(a
+								.getOndePub());
+						rankingMeiosPublicacao.put(a.getOndePub(), ++contagem);
+					} else {
+						rankingMeiosPublicacao.put(a.getOndePub(), 1);
+					}
+					;
+				}
+
+				for (Artigo referencia : a.getReferencia()) {
+					if (referencia.getOndePub() != null
+							&& !referencia.getOndePub().equals("")
+							&& referencia.getTitulo() != null
+							&& !referencia.getTitulo().equals("")) {
+						if (rankingMeiosPublicacao.containsKey(referencia
+								.getOndePub())
+								&& !listaArtigosVistos.contains(referencia
+										.getTitulo())) {
+							Integer contagem = rankingMeiosPublicacao
+									.get(referencia.getOndePub());
+							rankingMeiosPublicacao.put(referencia.getOndePub(),
+									++contagem);
+						} else {
+							rankingMeiosPublicacao.put(referencia.getOndePub(),
+									1);
+						}
+						;
+					}
+				}
+			}
 			
+	        ValueComparator bvc =  new ValueComparator(rankingMeiosPublicacao);
+	        TreeMap<String,Integer> sorted_map = new TreeMap<String,Integer>(bvc);
+	        sorted_map.putAll(rankingMeiosPublicacao);
+	        System.out.println("results: "+sorted_map);
+
+	        
+	        //gerando rede de artigos
 			try {
 				criaCabecalho(true);
-				criarNodosAutor(artigos);
-				criarArestasAutor(artigos);
-				criaArquivo("GrafoDeAutores2.graphml");
+				criarNodosArtigo(artigos);
+				criarArestasArtigo(artigos);
+				criaArquivo("GrafoDeArtigosWithYear.graphml");
 				salvarArquivo("");
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
+
+			// try {
+			// criaCabecalho(true);
+			// criarNodosAutor(artigos);
+			// criarArestasAutor(artigos);
+			// criaArquivo("GrafoDeAutoresCitacoes.graphml");
+			// salvarArquivo("");
+			// } catch (Exception ex) {
+			// ex.printStackTrace();
+			// }
 			System.out.println("Quantidade de artigos: " + artigos.size());
 
 		} catch (Exception ex) {
@@ -71,9 +122,11 @@ public class GerarGraphMLIEEE {
 	public static void criaCabecalho(boolean direcionado) {
 
 		XmlTO field1 = new XmlTO("name", true, "name", TypeEnum.STRING_TYPE);
+		XmlTO field2 = new XmlTO("year", true, "year", TypeEnum.INT_TYPE);
 
 		List<XmlTO> listaTO = new ArrayList<XmlTO>();
 		listaTO.add(field1);
+		listaTO.add(field2);
 
 		XMLUtil.generateHeader(listaTO, direcionado);
 	}
@@ -84,7 +137,7 @@ public class GerarGraphMLIEEE {
 		List<String> listaNodes = new ArrayList<String>();
 		for (Artigo paper : list) {
 			if (verificar(paper.getTitulo(), listaNodes)) {
-				XMLUtil.generateNodes(paper.getTitulo());
+				XMLUtil.generateNodes(paper.getTitulo(),paper.getPubYear());
 				listaNodes.add(paper.getTitulo());
 			}
 
@@ -92,7 +145,7 @@ public class GerarGraphMLIEEE {
 				for (Artigo referencia : paper.getReferencia()) {
 					if (referencia.getTitulo() != null) {
 						if (verificar(referencia.getTitulo(), listaNodes)) {
-							XMLUtil.generateNodes(referencia.getTitulo());
+							XMLUtil.generateNodes(referencia.getTitulo(),paper.getPubYear());
 						}
 					}
 				}
@@ -188,6 +241,7 @@ public class GerarGraphMLIEEE {
 					}
 				}
 			}
+
 		}
 
 	}
@@ -222,4 +276,23 @@ public class GerarGraphMLIEEE {
 		return true;
 	}
 
+}
+
+class ValueComparator implements Comparator<String> {
+
+	Map<String, Integer> base;
+
+	public ValueComparator(Map<String, Integer> base) {
+		this.base = base;
+	}
+
+	// Note: this comparator imposes orderings that are inconsistent with
+	// equals.
+	public int compare(String a, String b) {
+		if (base.get(a) >= base.get(b)) {
+			return -1;
+		} else {
+			return 1;
+		} // returning 0 would merge keys
+	}
 }
