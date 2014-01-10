@@ -86,6 +86,13 @@ public class XMLUtil {
 				.append("\n\t\t\t<data key=\"name\">").append(name)
 				.append("</data>").append("\n\t\t</node>");
 	}
+	
+	public static void generateNodes(String name, Integer year) {
+		arquivo.append("\n\t\t<node id=\"").append(name).append("\">")
+				.append("\n\t\t\t<data key=\"name\">").append(name)
+				.append("</data>").append("\n\t\t\t<data key=\"year\">").append(name)
+				.append("</data>").append("\n\t\t</node>");
+	}
 
 	
 	public static void generateNodes(long id_twitter, long id_label, String nome,
