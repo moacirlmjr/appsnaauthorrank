@@ -60,38 +60,37 @@ public class GerarGraphMLIEEE {
 					} else {
 						rankingMeiosPublicacao.put(a.getOndePub(), 1);
 					}
-					;
 				}
-
-				for (Artigo referencia : a.getReferencia()) {
-					if (referencia.getOndePub() != null
-							&& !referencia.getOndePub().equals("")
-							&& referencia.getTitulo() != null
-							&& !referencia.getTitulo().equals("")) {
-						if (rankingMeiosPublicacao.containsKey(referencia
-								.getOndePub())
-								&& !listaArtigosVistos.contains(referencia
-										.getTitulo())) {
-							Integer contagem = rankingMeiosPublicacao
-									.get(referencia.getOndePub());
-							rankingMeiosPublicacao.put(referencia.getOndePub(),
-									++contagem);
-						} else {
-							rankingMeiosPublicacao.put(referencia.getOndePub(),
-									1);
+				if (a.getReferencia() != null) {
+					for (Artigo referencia : a.getReferencia()) {
+						if (referencia.getOndePub() != null
+								&& !referencia.getOndePub().equals("")
+								&& referencia.getTitulo() != null
+								&& !referencia.getTitulo().equals("")) {
+							if (rankingMeiosPublicacao.containsKey(referencia
+									.getOndePub())
+									&& !listaArtigosVistos.contains(referencia
+											.getTitulo())) {
+								Integer contagem = rankingMeiosPublicacao
+										.get(referencia.getOndePub());
+								rankingMeiosPublicacao.put(
+										referencia.getOndePub(), ++contagem);
+							} else {
+								rankingMeiosPublicacao.put(
+										referencia.getOndePub(), 1);
+							}
 						}
-						;
 					}
 				}
 			}
-			
-	        ValueComparator bvc =  new ValueComparator(rankingMeiosPublicacao);
-	        TreeMap<String,Integer> sorted_map = new TreeMap<String,Integer>(bvc);
-	        sorted_map.putAll(rankingMeiosPublicacao);
-	        System.out.println("results: "+sorted_map);
 
-	        
-	        //gerando rede de artigos
+			ValueComparator bvc = new ValueComparator(rankingMeiosPublicacao);
+			TreeMap<String, Integer> sorted_map = new TreeMap<String, Integer>(
+					bvc);
+			sorted_map.putAll(rankingMeiosPublicacao);
+			System.out.println("results: " + sorted_map);
+
+			// gerando rede de artigos
 			try {
 				criaCabecalho(true);
 				criarNodosArtigo(artigos);
@@ -123,10 +122,13 @@ public class GerarGraphMLIEEE {
 
 		XmlTO field1 = new XmlTO("name", true, "name", TypeEnum.STRING_TYPE);
 		XmlTO field2 = new XmlTO("year", true, "year", TypeEnum.INT_TYPE);
+		XmlTO field3 = new XmlTO("journal", true, "journal",
+				TypeEnum.STRING_TYPE);
 
 		List<XmlTO> listaTO = new ArrayList<XmlTO>();
 		listaTO.add(field1);
 		listaTO.add(field2);
+		listaTO.add(field3);
 
 		XMLUtil.generateHeader(listaTO, direcionado);
 	}
@@ -137,7 +139,8 @@ public class GerarGraphMLIEEE {
 		List<String> listaNodes = new ArrayList<String>();
 		for (Artigo paper : list) {
 			if (verificar(paper.getTitulo(), listaNodes)) {
-				XMLUtil.generateNodes(paper.getTitulo(),paper.getPubYear());
+				XMLUtil.generateNodes(paper.getTitulo(), Integer.parseInt(paper
+						.getPubYear().replaceAll(" ", "")), paper.getOndePub());
 				listaNodes.add(paper.getTitulo());
 			}
 
@@ -145,7 +148,13 @@ public class GerarGraphMLIEEE {
 				for (Artigo referencia : paper.getReferencia()) {
 					if (referencia.getTitulo() != null) {
 						if (verificar(referencia.getTitulo(), listaNodes)) {
-							XMLUtil.generateNodes(referencia.getTitulo(),paper.getPubYear());
+							XMLUtil.generateNodes(
+									referencia.getTitulo(),
+									referencia.getPubYear() != null ? Integer
+											.parseInt(referencia.getPubYear()
+													.replaceAll(" ", "")) : 0,
+									referencia.getOndePub() != null ? referencia
+											.getOndePub() : "");
 						}
 					}
 				}
