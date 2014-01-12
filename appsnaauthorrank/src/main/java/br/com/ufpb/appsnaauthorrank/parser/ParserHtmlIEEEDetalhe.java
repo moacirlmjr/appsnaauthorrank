@@ -21,7 +21,7 @@ import org.xml.sax.InputSource;
 
 import br.com.ufpb.appsnaauthorrank.beans.Artigo;
 import br.com.ufpb.appsnaauthorrank.beans.Autor;
-import br.com.ufpb.appsnaauthorrank.post.PostFreeCityApi;
+import br.com.ufpb.appsnaauthorrank.post.PostFreeCiteApi;
 import br.com.ufpb.appsnaauthorrank.post.postIeeeForm;
 import br.com.ufpb.appsnaauthorrank.thread.ThreadGetReferencia;
 import br.com.ufpb.appsnaauthorrank.util.StringUtil;
@@ -65,7 +65,7 @@ public class ParserHtmlIEEEDetalhe {
 							DocumentBuilder docBuilder = dbf
 									.newDocumentBuilder();
 							String retorno = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
-									+ PostFreeCityApi
+									+ PostFreeCiteApi
 											.postCitationApi(referenciasString);
 							InputSource inStream = new InputSource(
 									new ByteArrayInputStream(

@@ -15,7 +15,7 @@ import org.xml.sax.InputSource;
 
 import br.com.ufpb.appsnaauthorrank.beans.Artigo;
 import br.com.ufpb.appsnaauthorrank.beans.Autor;
-import br.com.ufpb.appsnaauthorrank.post.PostFreeCityApi;
+import br.com.ufpb.appsnaauthorrank.post.PostFreeCiteApi;
 import br.com.ufpb.appsnaauthorrank.util.StringUtil;
 
 public class ThreadGetReferencia implements Callable<Artigo> {
@@ -39,7 +39,7 @@ public class ThreadGetReferencia implements Callable<Artigo> {
 			dbf.setNamespaceAware(false);
 			DocumentBuilder docBuilder = dbf.newDocumentBuilder();
 			String retorno = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
-					+ PostFreeCityApi.postCitationApi(StringUtil
+					+ PostFreeCiteApi.postCitationApi(StringUtil
 							.tratarCitacao(e.text()));
 			System.out.println("--->>>>>>" + StringUtil.tratarCitacao(e.text())
 					+ " ------- " + retorno.contains("valid='true'"));

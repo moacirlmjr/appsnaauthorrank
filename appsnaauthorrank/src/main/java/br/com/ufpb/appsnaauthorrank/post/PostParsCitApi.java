@@ -11,10 +11,9 @@ import java.util.List;
 
 import br.com.ufpb.appsnaauthorrank.util.StringUtil;
 
+public class PostParsCitApi {
 
-public class PostFreeCityApi {
-
-	private static final String url = "http://freecite.library.brown.edu/citations/create";
+	private static final String url = "http://aye.comp.nus.edu.sg/parsCit/parsCit.cgi";
 
 	public static String postCitationApi(String citation) throws Exception {
 
@@ -23,46 +22,16 @@ public class PostFreeCityApi {
 
 		// add reuqest header
 		con.setRequestMethod("POST");
-		con.setRequestProperty("Accept", "text/xml");
-		con.setRequestProperty("user-agent", "Mozilla/5.0");
+		con.setRequestProperty("Accept",
+				"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+		con.setRequestProperty("Content-Type",
+				"multipart/form-data; boundary=----WebKitFormBoundaryVxLBp3AVkup705BG");
+		con.setRequestProperty(
+				"User-agent",
+				"Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.72 Safari/537.36");
 
-		String urlParameters = "citation=" + URLEncoder.encode(citation, "UTF-8");
-
-		// Send post request
-		con.setDoOutput(true);
-		DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-		wr.writeBytes(urlParameters);
-		wr.flush();
-		wr.close();
-
-		BufferedReader in = new BufferedReader(new InputStreamReader(
-				con.getInputStream()));
-		String inputLine;
-		StringBuffer response = new StringBuffer();
-
-		while ((inputLine = in.readLine()) != null) {
-			response.append(inputLine);
-		}
-		in.close();
-
-		// print result
-		return response.toString();
-	}
-	
-	public static String postCitationApi(List<String> citations) throws Exception {
-
-		URL obj = new URL(url);
-		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-
-		// add reuqest header
-		con.setRequestMethod("POST");
-		con.setRequestProperty("Accept", "text/xml");
-		con.setRequestProperty("user-agent", "Mozilla/5.0");
-
-		String urlParameters = "";
-		for(String citation : citations){
-			urlParameters+= "citation[]=" +  URLEncoder.encode(StringUtil.tratarCitacao(citation), "UTF-8") + "&";
-		}
+		String urlParameters = "textlines="
+				+ URLEncoder.encode(citation, "UTF-8")+ "&demo=3&bib3=on";
 
 		// Send post request
 		con.setDoOutput(true);
@@ -96,7 +65,7 @@ public class PostFreeCityApi {
 			citations.add("de Laat, M., Network and Content in an Online Community Discourse, from http://www.uu.nl/uupublish/content/2002%20Networked%20Learning%201.pd, 2002. ");
 			
 			System.out
-			.println(postCitationApi(citations));
+			.println(postCitationApi("Tsai, W. and S. Ghoshal, Social Capital and Value Creation: The Role of Intrafirm Networks. The Academy of Management Journal, 1998. 41(4): p. 464-476. "));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
