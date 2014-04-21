@@ -1,7 +1,6 @@
 package br.com.ufpb.appsnaauthorrank.main;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,7 +20,7 @@ import br.com.ufpb.appsnaauthorrank.util.ValueComparator;
 public class GerarGraphMLIEEEAllCitadosEntreSi {
 
 	private static final int ACTIVES_TASK = 2;
-	private static final int QTE_THREADS_EXEC = 20;
+	private static final int QTE_THREADS_EXEC = 50;
 	private static final int NTHREADS = Runtime.getRuntime().availableProcessors()*4;
 	private static final ExecutorService exec = Executors.newFixedThreadPool(NTHREADS);
 
@@ -31,13 +30,13 @@ public class GerarGraphMLIEEEAllCitadosEntreSi {
 
 			Integer lastPage = ParserHtmlIEEE.getLastPage(
 					postIeeeForm
-					.post("\"Embedded System\"",
+					.post("\"Social Network Analysis\" and online",
 							1));
 			int count = 0;
 			Map<Integer, Future<List<Artigo>>> mapArtigosRetornadosCall = new HashMap<>();
 			for(int i = 1; i<=lastPage;i++){
 				ParserHtmlIEEE parser = new ParserHtmlIEEE();
-				parser.setQuery("\"Embedded System\"");
+				parser.setQuery("\"Social Network Analysis\" and online");
 				parser.setPage(i);
 				Future<List<Artigo>> artigoListCall = exec.submit(parser);
 				mapArtigosRetornadosCall.put(i, artigoListCall);
@@ -139,7 +138,7 @@ public class GerarGraphMLIEEEAllCitadosEntreSi {
 				PaperUtil.criaCabecalhoArtigo(true);
 				PaperUtil.criarNodosArtigo(listAux);
 				PaperUtil.criarArestasArtigo(listAux);
-				PaperUtil.criaArquivo("C:\\Users\\Moacir\\Desktop\\ARS\\GrafoDeArtigosRetornados.graphml");
+				PaperUtil.criaArquivo("C:\\Users\\Moacir\\Desktop\\ARS\\GrafoDeArtigosRetornadosSNA.graphml");
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
@@ -153,7 +152,7 @@ public class GerarGraphMLIEEEAllCitadosEntreSi {
 			// ex.printStackTrace();
 			// }
 			System.out.println("Quantidade de artigos: " + listArtigos.size());
-
+			System.exit(0);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}

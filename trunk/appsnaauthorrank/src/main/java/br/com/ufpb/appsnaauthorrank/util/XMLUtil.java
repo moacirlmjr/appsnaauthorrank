@@ -87,12 +87,13 @@ public class XMLUtil {
 				.append("</data>").append("\n\t\t</node>");
 	}
 	
-	public static void generateNodes(String name, Integer year, String journal, Integer referencia) {
+	public static void generateNodes(String name, Integer year, String journal, Integer referencia, String keywords) {
 		arquivo.append("\n\t\t<node id=\"").append(name).append("\">")
 				.append("\n\t\t\t<data key=\"name\">").append(name)
 				.append("</data>").append("\n\t\t\t<data key=\"year\">").append(year)
 				.append("</data>").append("\n\t\t\t<data key=\"journal\">").append(journal)
 				.append("</data>").append("\n\t\t\t<data key=\"referencia\">").append(referencia)
+				.append("</data>").append("\n\t\t\t<data key=\"keywords\">").append(keywords)
 				.append("</data>").append("\n\t\t</node>");
 	}
 

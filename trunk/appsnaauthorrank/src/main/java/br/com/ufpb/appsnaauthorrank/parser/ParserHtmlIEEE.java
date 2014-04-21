@@ -45,10 +45,11 @@ public class ParserHtmlIEEE implements Callable<List<Artigo>> {
 					Element H3 = detail.getElementsByTag("h3").first();
 					if (H3.getElementsByTag("a").first() != null) {
 						artigo.setTitulo(H3.getElementsByTag("a").first()
-								.text().toLowerCase()
+								.text().toLowerCase().replaceAll("&","and")
 								.replaceAll("[^\\p{L}\\p{Z}]", ""));
 					} else {
-						artigo.setTitulo(H3.text());
+						artigo.setTitulo(H3.text().toLowerCase().replaceAll("&","and")
+								.replaceAll("[^\\p{L}\\p{Z}]", ""));
 					}
 					String textoDetail[] = detail.toString().split("\n");
 
