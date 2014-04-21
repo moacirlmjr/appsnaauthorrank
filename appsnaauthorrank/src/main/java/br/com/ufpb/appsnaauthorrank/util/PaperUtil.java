@@ -17,12 +17,14 @@ public class PaperUtil {
 		XmlTO field3 = new XmlTO("journal", true, "journal",
 				TypeEnum.STRING_TYPE);
 		XmlTO field4 = new XmlTO("referencia", true, "referencia", TypeEnum.INT_TYPE);
+		XmlTO field5 = new XmlTO("keywords", true, "keywords", TypeEnum.STRING_TYPE);
 
 		List<XmlTO> listaTO = new ArrayList<XmlTO>();
 		listaTO.add(field1);
 		listaTO.add(field2);
 		listaTO.add(field3);
 		listaTO.add(field4);
+		listaTO.add(field5);
 
 		XMLUtil.generateHeader(listaTO, direcionado);
 	}
@@ -45,7 +47,7 @@ public class PaperUtil {
 			if (verificar(paper.getTitulo().toLowerCase(), listaNodes)) {
 				XMLUtil.generateNodes(paper.getTitulo().toLowerCase(), paper
 						.getPubYear()!= null? Integer.parseInt(paper
-						.getPubYear().replaceAll(" ", "")):0, paper.getOndePub(), 0);
+						.getPubYear().replaceAll(" ", "")):0, paper.getOndePub(), 0,paper.getKeywords()!= null?paper.getKeywords().toString():"No Keyword");
 				listaNodes.add(paper.getTitulo());
 			}
 
@@ -59,7 +61,7 @@ public class PaperUtil {
 											.parseInt(referencia.getPubYear()
 													.replaceAll(" ", "")) : 0,
 									referencia.getOndePub() != null ? referencia
-											.getOndePub() : "Sem local",1);
+											.getOndePub() : "Sem local",1,paper.getKeywords()!= null?paper.getKeywords().toString():"No Keyword");
 						}
 					}
 				}
