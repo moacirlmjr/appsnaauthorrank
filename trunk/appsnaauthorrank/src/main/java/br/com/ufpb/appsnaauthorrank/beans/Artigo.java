@@ -12,6 +12,7 @@ public class Artigo {
 	private String origem;
 	private String issn;
 	private Set<Autor> autores;
+	private Set<String> keywords;
 	private Set<Artigo> referencia;
 
 	public String getTitulo() {
@@ -84,5 +85,13 @@ public class Artigo {
 
 	public void setReferencia(Set<Artigo> referencia) {
 		this.referencia = referencia;
+	}
+
+	public Set<String> getKeywords() {
+		return keywords;
+	}
+
+	public void setKeywords(Set<String> keywords) {
+		this.keywords = keywords;
 	}
 }

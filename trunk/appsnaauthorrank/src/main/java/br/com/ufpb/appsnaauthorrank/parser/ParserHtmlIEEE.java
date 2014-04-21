@@ -1,8 +1,9 @@
 package br.com.ufpb.appsnaauthorrank.parser;
 
-import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -10,17 +11,18 @@ import org.jsoup.nodes.Element;
 
 import br.com.ufpb.appsnaauthorrank.beans.Artigo;
 import br.com.ufpb.appsnaauthorrank.beans.Autor;
-import java.util.HashSet;
-import java.util.Set;
-import org.jsoup.select.Elements;
+import br.com.ufpb.appsnaauthorrank.post.postIeeeForm;
 
-public class ParserHtmlIEEE {
+public class ParserHtmlIEEE implements Callable<List<Artigo>> {
 
 	private static final String ARTIGO = "detail";
 	private static final String LIST_ARTIGOS = "header";
 	private static final String SEARCH_RESULTS = "Results";
 	private static final String PAGINATION = "pagination";
 	private static final String NOABSTRACT = "noAbstract";
+
+	private String query;
+	private Integer page;
 
 	public static List<Artigo> realizarParserHtml(String html) throws Exception {
 
@@ -43,7 +45,8 @@ public class ParserHtmlIEEE {
 					Element H3 = detail.getElementsByTag("h3").first();
 					if (H3.getElementsByTag("a").first() != null) {
 						artigo.setTitulo(H3.getElementsByTag("a").first()
-								.text().replace("\"", "").replace("&", ""));
+								.text().toLowerCase()
+								.replaceAll("[^\\p{L}\\p{Z}]", ""));
 					} else {
 						artigo.setTitulo(H3.text());
 					}
@@ -113,6 +116,38 @@ public class ParserHtmlIEEE {
 			}
 		}
 		return artigos;
+	}
+
+	public static Integer getLastPage(String html) throws Exception {
+
+		Document doc = Jsoup.parse(html);
+		for (Element e : doc.getElementsByAttributeValue("title", "Last")) {
+			String onclick = e.attr("onclick").replaceAll("[^\\d]", "");
+			return Integer.parseInt(onclick);
+		}
+
+		return null;
+	}
+
+	public String getQuery() {
+		return query;
+	}
+
+	public void setQuery(String query) {
+		this.query = query;
+	}
+
+	public Integer getPage() {
+		return page;
+	}
+
+	public void setPage(Integer page) {
+		this.page = page;
+	}
+
+	@Override
+	public List<Artigo> call() throws Exception {
+		return realizarParserHtml(postIeeeForm.post(query, page));
 	}
 
 }

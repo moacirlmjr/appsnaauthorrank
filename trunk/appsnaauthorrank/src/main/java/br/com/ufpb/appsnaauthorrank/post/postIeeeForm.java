@@ -2,6 +2,7 @@ package br.com.ufpb.appsnaauthorrank.post;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -11,6 +12,7 @@ public class postIeeeForm {
 	// FORM IEEE
 
 	private static final String URL_FORM = "http://ieeexplore.ieee.org/search/searchresult.jsp";
+	private static final Integer TIMEOUT_VALUE = 30000;
 
 	public static String post(String busca, int pagina) throws Exception {
 		String data = "";
@@ -22,26 +24,37 @@ public class postIeeeForm {
 			e.printStackTrace();
 		}
 
-		return obterPagina(data);
+		return obterPagina(data,0);
 	}
 
-	public static String obterPagina(String caminho) throws Exception {
+	public static String obterPagina(String caminho, Integer countConnections) {
+		try {
+			if(countConnections >= 3){
+				return null;
+			}
+			URL url = new URL(caminho);
+			URLConnection urlConnection = url.openConnection();
 
-		URL url = new URL(caminho);
-		URLConnection urlConnection = url.openConnection();
+			// Obtem as respostas
+			urlConnection.setDoOutput(true);
+			urlConnection.setConnectTimeout(TIMEOUT_VALUE);
+			urlConnection.setReadTimeout(TIMEOUT_VALUE);
+			InputStreamReader inputReader = new InputStreamReader(
+					urlConnection.getInputStream());
+			BufferedReader bufferedReader = new BufferedReader(inputReader);
 
-		// Obtem as respostas
-		urlConnection.setDoOutput(true);
-		InputStreamReader inputReader = new InputStreamReader(
-				urlConnection.getInputStream());
-		BufferedReader bufferedReader = new BufferedReader(inputReader);
+			String linha = "";
+			StringBuffer pag = new StringBuffer();
+			while ((linha = bufferedReader.readLine()) != null) {
+				pag.append(linha);
+			}
 
-		String linha = "";
-		StringBuffer pag = new StringBuffer();
-		while ((linha = bufferedReader.readLine()) != null) {
-			pag.append(linha);
+			return pag.toString();
+		} catch (SocketTimeoutException e) {
+			return obterPagina(caminho,countConnections+1);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-
-		return pag.toString();
+		return null;
 	}
 }

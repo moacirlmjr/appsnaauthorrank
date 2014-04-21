@@ -90,10 +90,10 @@ public class PostFreeCiteApi {
 //			System.out
 //					.println(postCitationApi("Hong, W., Han, X. P., Zhou, T. & Wang, B. H. Scaling Behaviors in Short-Message Communication"));
 			List<String> citations = new ArrayList<>();
-			citations.add("Tsai, W. and S. Ghoshal, Social Capital and Value Creation: The Role of Intrafirm Networks. The Academy of Management Journal, 1998. 41(4): p. 464-476. ");
-			citations.add("de Laat, M., Lally, V., Lipponen, L., Simon, R., J., \"Investigating patterns of interaction in networked learning and computer-supported collaborative learning: A role for Social Network Analysis\", Journal of Computer Supported Collaborative Learning, 2007. ");
-			citations.add("Harasim, L., Hiltz, S. R., Teles, L., & TuroV, M, \"Learning networks: A Weld guide to teaching and learning online. Cambridge, MA: MIT Press, 1995. ");
-			citations.add("de Laat, M., Network and Content in an Online Community Discourse, from http://www.uu.nl/uupublish/content/2002%20Networked%20Learning%201.pd, 2002. ");
+			citations.add("Spatariu, A., Hartley, K. and Bendixen, L.D. 2004, \"Defining and measuring quality in on-line discussion\", Journal of Interactive Online Learning. Vol 2 (4)");
+			citations.add("de Laat, M., Lally, V., Lipponen, L., Simon, R., J., \"Investigating patterns of interaction in networked learning and computer-supported collaborative learning: A role for Social Network Analysis\", Journal of Computer Supported Collaborative Learning, 2007.Â ");
+			citations.add("Harasim, L., Hiltz, S. R., Teles, L., & TuroV, M, \"Learning networks: A Weld guide to teaching and learning online. Cambridge, MA: MIT Press, 1995.Â ");
+			citations.add("de Laat, M., Network and Content in an Online Community Discourse, from http://www.uu.nl/uupublish/content/2002%20Networked%20Learning%201.pd, 2002.Â ");
 			
 			System.out
 			.println(postCitationApi(citations));
