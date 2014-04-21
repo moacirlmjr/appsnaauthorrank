@@ -45,7 +45,7 @@ public class ParserHtmlACMDetalhe {
 				String urlReferencias = artigo.getLinkDetalhe().replace(
 						"articleDetails", "abstractReferences");
 				String pagina = postIeeeForm.obterPagina(URL_IEEE
-						+ urlReferencias);
+						+ urlReferencias,0);
 				doc = Jsoup.parse(pagina);
 
 				if (!doc.select(".docs").isEmpty()) {
