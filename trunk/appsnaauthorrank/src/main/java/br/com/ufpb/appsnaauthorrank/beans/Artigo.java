@@ -4,6 +4,7 @@ import java.util.Set;
 
 public class Artigo {
 
+	private Long id;
 	private String titulo;
 	private String pubYear;
 	private String ondePub;
@@ -12,8 +13,16 @@ public class Artigo {
 	private String origem;
 	private String issn;
 	private Set<Autor> autores;
-	private Set<String> keywords;
+	private String keywords;
 	private Set<Artigo> referencia;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 
 	public String getTitulo() {
 		return titulo;
@@ -87,11 +96,11 @@ public class Artigo {
 		this.referencia = referencia;
 	}
 
-	public Set<String> getKeywords() {
+	public String getKeywords() {
 		return keywords;
 	}
 
-	public void setKeywords(Set<String> keywords) {
+	public void setKeywords(String keywords) {
 		this.keywords = keywords;
 	}
 }

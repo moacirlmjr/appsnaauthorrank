@@ -16,8 +16,10 @@ public class PaperUtil {
 		XmlTO field2 = new XmlTO("year", true, "year", TypeEnum.INT_TYPE);
 		XmlTO field3 = new XmlTO("journal", true, "journal",
 				TypeEnum.STRING_TYPE);
-		XmlTO field4 = new XmlTO("referencia", true, "referencia", TypeEnum.INT_TYPE);
-		XmlTO field5 = new XmlTO("keywords", true, "keywords", TypeEnum.STRING_TYPE);
+		XmlTO field4 = new XmlTO("author", true, "author",
+				TypeEnum.STRING_TYPE);
+		XmlTO field5 = new XmlTO("keywords", true, "keywords",
+				TypeEnum.STRING_TYPE);
 
 		List<XmlTO> listaTO = new ArrayList<XmlTO>();
 		listaTO.add(field1);
@@ -28,7 +30,7 @@ public class PaperUtil {
 
 		XMLUtil.generateHeader(listaTO, direcionado);
 	}
-	
+
 	public static void criaCabecalhoAutor(boolean direcionado) {
 
 		XmlTO field1 = new XmlTO("name", true, "name", TypeEnum.STRING_TYPE);
@@ -45,23 +47,29 @@ public class PaperUtil {
 		List<String> listaNodes = new ArrayList<String>();
 		for (Artigo paper : list) {
 			if (verificar(paper.getTitulo().toLowerCase(), listaNodes)) {
-				XMLUtil.generateNodes(paper.getTitulo().toLowerCase(), paper
-						.getPubYear()!= null? Integer.parseInt(paper
-						.getPubYear().replaceAll(" ", "")):0, paper.getOndePub(), 0,paper.getKeywords()!= null?paper.getKeywords().toString():"No Keyword");
+				XMLUtil.generateNodes(
+						paper.getTitulo().toLowerCase(),
+						paper.getPubYear() != null ? Integer.parseInt(paper
+								.getPubYear().replaceAll(" ", "")) : 0, paper
+								.getOndePub(), 0, paper.getKeywords()!= null && paper.getKeywords().equals("")?"No Keyword":paper.getKeywords(), paper.getAutores() != null ?paper.getAutores():null);
 				listaNodes.add(paper.getTitulo());
 			}
 
 			if (paper.getReferencia() != null) {
 				for (Artigo referencia : paper.getReferencia()) {
 					if (referencia.getTitulo() != null) {
-						if (verificar(referencia.getTitulo().toLowerCase(), listaNodes)) {
+						if (verificar(referencia.getTitulo().toLowerCase(),
+								listaNodes)) {
 							XMLUtil.generateNodes(
 									referencia.getTitulo().toLowerCase(),
-									referencia.getPubYear() != null && !referencia.getPubYear().equals("")? Integer
+									referencia.getPubYear() != null
+											&& !referencia.getPubYear().equals(
+													"") ? Integer
 											.parseInt(referencia.getPubYear()
 													.replaceAll(" ", "")) : 0,
 									referencia.getOndePub() != null ? referencia
-											.getOndePub() : "Sem local",1,paper.getKeywords()!= null?paper.getKeywords().toString():"No Keyword");
+											.getOndePub() : "Sem local",
+									1,	paper.getKeywords() , paper.getAutores() != null ?paper.getAutores():null);
 						}
 					}
 				}

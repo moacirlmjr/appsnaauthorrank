@@ -24,9 +24,9 @@ public class GerarGraphMLIEEEAllReferencies {
 		try {
 			List<Artigo> tempArtigos = new ArrayList<Artigo>();
 			int contador = 1;
-
+			ParserHtmlIEEE p = new ParserHtmlIEEE();
 			while (tempArtigos != null) {
-				tempArtigos = ParserHtmlIEEE.realizarParserHtml(postIeeeForm
+				tempArtigos = p.realizarParserHtml(postIeeeForm
 						.post("\"Embedded System\"",
 								contador));
 				if (tempArtigos != null)

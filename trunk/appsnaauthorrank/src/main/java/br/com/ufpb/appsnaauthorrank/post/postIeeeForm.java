@@ -12,7 +12,7 @@ public class postIeeeForm {
 	// FORM IEEE
 
 	private static final String URL_FORM = "http://ieeexplore.ieee.org/search/searchresult.jsp";
-	private static final Integer TIMEOUT_VALUE = 30000;
+	private static final Integer TIMEOUT_VALUE = 10000;
 
 	public static String post(String busca, int pagina) throws Exception {
 		String data = "";
