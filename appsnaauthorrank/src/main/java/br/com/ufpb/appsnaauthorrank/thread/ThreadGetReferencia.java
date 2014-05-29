@@ -40,7 +40,7 @@ public class ThreadGetReferencia implements Callable<Artigo> {
 			DocumentBuilder docBuilder = dbf.newDocumentBuilder();
 			String retorno = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
 					+ PostFreeCiteApi.postCitationApi(StringUtil
-							.tratarCitacao(e.text()));
+							.tratarCitacao(e.text()),0);
 			System.out.println("--->>>>>>" + StringUtil.tratarCitacao(e.text())
 					+ " ------- " + retorno.contains("valid='true'"));
 			InputSource inStream = new InputSource(new ByteArrayInputStream(

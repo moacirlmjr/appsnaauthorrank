@@ -24,7 +24,7 @@ public class ParserHtmlIEEE implements Callable<List<Artigo>> {
 	private String query;
 	private Integer page;
 
-	public static List<Artigo> realizarParserHtml(String html) throws Exception {
+	public List<Artigo> realizarParserHtml(String html) throws Exception {
 
 		List<Artigo> artigos = new ArrayList<Artigo>();
 		Document doc = Jsoup.parse(html);
@@ -87,7 +87,7 @@ public class ParserHtmlIEEE implements Callable<List<Artigo>> {
 						} else if (texto.contains("RecentIssue.jsp")) {
 							Document doc2 = Jsoup.parseBodyFragment(texto);
 							Element link = doc2.body();
-							artigo.setOndePub(link.text());
+							artigo.setOndePub(link.text().replaceAll("&","and"));
 						} else if (texto.contains("stamp.jsp?")) {
 							Document doc2 = Jsoup.parseBodyFragment(texto);
 							Element linkDownloadElement = doc2.body();
@@ -118,7 +118,7 @@ public class ParserHtmlIEEE implements Callable<List<Artigo>> {
 		}
 		return artigos;
 	}
-
+	
 	public static Integer getLastPage(String html) throws Exception {
 
 		Document doc = Jsoup.parse(html);
@@ -129,7 +129,7 @@ public class ParserHtmlIEEE implements Callable<List<Artigo>> {
 
 		return null;
 	}
-
+	
 	public String getQuery() {
 		return query;
 	}
@@ -145,7 +145,7 @@ public class ParserHtmlIEEE implements Callable<List<Artigo>> {
 	public void setPage(Integer page) {
 		this.page = page;
 	}
-
+	
 	@Override
 	public List<Artigo> call() throws Exception {
 		return realizarParserHtml(postIeeeForm.post(query, page));

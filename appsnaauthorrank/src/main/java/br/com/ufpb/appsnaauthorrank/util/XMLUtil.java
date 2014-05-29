@@ -4,7 +4,9 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
+import br.com.ufpb.appsnaauthorrank.beans.Autor;
 import br.com.ufpb.appsnaauthorrank.beans.to.XmlTO;
 
 public class XMLUtil {
@@ -61,17 +63,14 @@ public class XMLUtil {
 	public static void generateNodes(long userId, long id_label, String name) {
 		arquivo.append("\n\t\t<node id=\"").append(userId).append("\">")
 				.append("\n\t\t\t<data key=\"name\">").append(name)
-				.append("</data>")
-				.append("\n\t\t\t<data key=\"id_label\">").append(id_label)
-				.append("</data>")
-				.append("\n\t\t</node>");
+				.append("</data>").append("\n\t\t\t<data key=\"id_label\">")
+				.append(id_label).append("</data>").append("\n\t\t</node>");
 	}
-	
+
 	public static void generateNodes(long userId, String name) {
 		arquivo.append("\n\t\t<node id=\"").append(userId).append("\">")
 				.append("\n\t\t\t<data key=\"name\">").append(name)
-				.append("</data>")				
-				.append("\n\t\t</node>");
+				.append("</data>").append("\n\t\t</node>");
 	}
 
 	public static void generateNodes(String userId, String name) {
@@ -86,32 +85,49 @@ public class XMLUtil {
 				.append("\n\t\t\t<data key=\"name\">").append(name)
 				.append("</data>").append("\n\t\t</node>");
 	}
-	
-	public static void generateNodes(String name, Integer year, String journal, Integer referencia, String keywords) {
+
+	public static void generateNodes(String name, Integer year,
+			String journal, Integer referencia, String keywords,
+			Set<Autor> authors) {
+		String autores = "";
+		if(autores != null){
+			for(Autor a :authors){
+				autores+= a.getNome() + ", ";
+			}
+		}
 		arquivo.append("\n\t\t<node id=\"").append(name).append("\">")
 				.append("\n\t\t\t<data key=\"name\">").append(name)
-				.append("</data>").append("\n\t\t\t<data key=\"year\">").append(year)
-				.append("</data>").append("\n\t\t\t<data key=\"journal\">").append(journal)
-				.append("</data>").append("\n\t\t\t<data key=\"referencia\">").append(referencia)
-				.append("</data>").append("\n\t\t\t<data key=\"keywords\">").append(keywords)
-				.append("</data>").append("\n\t\t</node>");
+				.append("</data>").append("\n\t\t\t<data key=\"year\">")
+				.append(year).append("</data>")
+				.append("\n\t\t\t<data key=\"journal\">").append(journal)
+				.append("</data>").append("\n\t\t\t<data key=\"author\">")
+				.append(autores).append("</data>");
+		arquivo.append("\n\t\t\t<data key=\"keywords\">")
+						.append(keywords).append("</data>");
+		arquivo.append("\n\t\t</node>");
 	}
 
-	
-	public static void generateNodes(long id_twitter, long id_label, String nome,
-			int tipo, int qtde_negativas, int vizinhanca_all, int vizinhanca_simple,
-			int neg_vizinhanca, float inadimplencia ) {
+	public static void generateNodes(long id_twitter, long id_label,
+			String nome, int tipo, int qtde_negativas, int vizinhanca_all,
+			int vizinhanca_simple, int neg_vizinhanca, float inadimplencia) {
 		arquivo.append("\n\t\t<node id=\"").append(id_twitter).append("\">")
-				.append("\n\t\t\t<data key=\"id_twitter\">").append(id_twitter).append("</data>")
-				.append("\n\t\t\t<data key=\"id_label\">").append(id_label).append("</data>")
-				.append("\n\t\t\t<data key=\"name\">").append(nome).append("</data>")
-				.append("\n\t\t\t<data key=\"tipo\">").append(tipo).append("</data>")
-				.append("\n\t\t\t<data key=\"qtde_negativas\">").append(qtde_negativas).append("</data>")
-				.append("\n\t\t\t<data key=\"vizinhanca_all\">").append(vizinhanca_all).append("</data>")
-				.append("\n\t\t\t<data key=\"vizinhanca_simple\">").append(vizinhanca_simple).append("</data>")
-				.append("\n\t\t\t<data key=\"neg_vizinhanca\">").append(neg_vizinhanca).append("</data>")
-				.append("\n\t\t\t<data key=\"inadimplencia\">").append(inadimplencia).append("</data>")				
-		.append("\n\t\t</node>");
+				.append("\n\t\t\t<data key=\"id_twitter\">").append(id_twitter)
+				.append("</data>").append("\n\t\t\t<data key=\"id_label\">")
+				.append(id_label).append("</data>")
+				.append("\n\t\t\t<data key=\"name\">").append(nome)
+				.append("</data>").append("\n\t\t\t<data key=\"tipo\">")
+				.append(tipo).append("</data>")
+				.append("\n\t\t\t<data key=\"qtde_negativas\">")
+				.append(qtde_negativas).append("</data>")
+				.append("\n\t\t\t<data key=\"vizinhanca_all\">")
+				.append(vizinhanca_all).append("</data>")
+				.append("\n\t\t\t<data key=\"vizinhanca_simple\">")
+				.append(vizinhanca_simple).append("</data>")
+				.append("\n\t\t\t<data key=\"neg_vizinhanca\">")
+				.append(neg_vizinhanca).append("</data>")
+				.append("\n\t\t\t<data key=\"inadimplencia\">")
+				.append(inadimplencia).append("</data>")
+				.append("\n\t\t</node>");
 	}
 
 	// Nessa método serão construídos as arestas correspondes ao id do usuário
@@ -121,7 +137,7 @@ public class XMLUtil {
 				.append("\" target=\"").append(idTarget)
 				.append("\"></edge>\n\t\t\t");
 	}
-	
+
 	public static void generateEdges(String idSource, String idTarget) {
 		arquivo.append("\n\t\t<edge source=\"").append(idSource)
 				.append("\" target=\"").append(idTarget)
@@ -140,14 +156,14 @@ public class XMLUtil {
 	}
 
 	// Metodo sobrescrito
-	public static void generateEdges(String idSource, String idTarget, int total_mencoes) {
+	public static void generateEdges(String idSource, String idTarget,
+			int total_mencoes) {
 		arquivo.append("\n\t\t<edge source=\"").append(idSource)
 				.append("\" target=\"").append(idTarget)
-				.append("\">\n\t\t<data key=\"total_mencoes\">").append(total_mencoes)
-				.append("</data>\n\t\t")
+				.append("\">\n\t\t<data key=\"total_mencoes\">")
+				.append(total_mencoes).append("</data>\n\t\t")
 				.append("</edge>\n\t\t\t");
 	}
-
 
 	// Metodo para fechar o arquivo
 	public static void fechaArquivo() {

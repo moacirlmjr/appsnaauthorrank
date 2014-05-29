@@ -1,6 +1,7 @@
 package br.com.ufpb.appsnaauthorrank.main;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,15 +29,17 @@ public class GerarGraphMLIEEEAllCitadosEntreSi {
 		try {
 			List<Artigo> listArtigos = new ArrayList<>(); 
 
+			String query = "\"Embedded System\"";
+			
 			Integer lastPage = ParserHtmlIEEE.getLastPage(
 					postIeeeForm
-					.post("\"Social Network Analysis\" and online",
+					.post(query,
 							1));
 			int count = 0;
 			Map<Integer, Future<List<Artigo>>> mapArtigosRetornadosCall = new HashMap<>();
 			for(int i = 1; i<=lastPage;i++){
 				ParserHtmlIEEE parser = new ParserHtmlIEEE();
-				parser.setQuery("\"Social Network Analysis\" and online");
+				parser.setQuery(query);
 				parser.setPage(i);
 				Future<List<Artigo>> artigoListCall = exec.submit(parser);
 				mapArtigosRetornadosCall.put(i, artigoListCall);
@@ -138,7 +141,7 @@ public class GerarGraphMLIEEEAllCitadosEntreSi {
 				PaperUtil.criaCabecalhoArtigo(true);
 				PaperUtil.criarNodosArtigo(listAux);
 				PaperUtil.criarArestasArtigo(listAux);
-				PaperUtil.criaArquivo("C:\\Users\\Moacir\\Desktop\\ARS\\GrafoDeArtigosRetornadosSNA.graphml");
+				PaperUtil.criaArquivo("C:\\Users\\Moacir\\Desktop\\ARS\\GrafoDeArtigosRetornadosES2.graphml");
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
@@ -152,6 +155,7 @@ public class GerarGraphMLIEEEAllCitadosEntreSi {
 			// ex.printStackTrace();
 			// }
 			System.out.println("Quantidade de artigos: " + listArtigos.size());
+			System.out.println(new Date());
 			System.exit(0);
 		} catch (Exception ex) {
 			ex.printStackTrace();
