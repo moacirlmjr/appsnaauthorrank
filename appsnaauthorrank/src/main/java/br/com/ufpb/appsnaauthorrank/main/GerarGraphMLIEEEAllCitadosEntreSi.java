@@ -92,56 +92,56 @@ public class GerarGraphMLIEEEAllCitadosEntreSi {
 				}
 			}
 
-			// ranking dos meios de publicação mais relevantes
-			Map<String, Integer> rankingMeiosPublicacao = new HashMap<>();
-			List<String> listaArtigosVistos = new LinkedList<>();
-			for (Artigo a : listAux) {
-				if (a.getOndePub() != null && !a.getOndePub().equals("")
-						&& a.getTitulo() != null && !a.getTitulo().equals("")) {
-					if (rankingMeiosPublicacao.containsKey(a.getOndePub())
-							&& !listaArtigosVistos.contains(a.getTitulo())) {
-						Integer contagem = rankingMeiosPublicacao.get(a
-								.getOndePub());
-						rankingMeiosPublicacao.put(a.getOndePub(), ++contagem);
-					} else {
-						rankingMeiosPublicacao.put(a.getOndePub(), 1);
-					}
-				}
-				if (a.getReferencia() != null) {
-					for (Artigo referencia : a.getReferencia()) {
-						if (referencia.getOndePub() != null
-								&& !referencia.getOndePub().equals("")
-								&& referencia.getTitulo() != null
-								&& !referencia.getTitulo().equals("")) {
-							if (rankingMeiosPublicacao.containsKey(referencia
-									.getOndePub())
-									&& !listaArtigosVistos.contains(referencia
-											.getTitulo())) {
-								Integer contagem = rankingMeiosPublicacao
-										.get(referencia.getOndePub());
-								rankingMeiosPublicacao.put(
-										referencia.getOndePub(), ++contagem);
-							} else {
-								rankingMeiosPublicacao.put(
-										referencia.getOndePub(), 1);
-							}
-						}
-					}
-				}
-			}
-
-			ValueComparator bvc = new ValueComparator(rankingMeiosPublicacao);
-			TreeMap<String, Integer> sorted_map = new TreeMap<String, Integer>(
-					bvc);
-			sorted_map.putAll(rankingMeiosPublicacao);
-			System.out.println("results: " + sorted_map);
+//			// ranking dos meios de publicação mais relevantes
+//			Map<String, Integer> rankingMeiosPublicacao = new HashMap<>();
+//			List<String> listaArtigosVistos = new LinkedList<>();
+//			for (Artigo a : listAux) {
+//				if (a.getOndePub() != null && !a.getOndePub().equals("")
+//						&& a.getTitulo() != null && !a.getTitulo().equals("")) {
+//					if (rankingMeiosPublicacao.containsKey(a.getOndePub())
+//							&& !listaArtigosVistos.contains(a.getTitulo())) {
+//						Integer contagem = rankingMeiosPublicacao.get(a
+//								.getOndePub());
+//						rankingMeiosPublicacao.put(a.getOndePub(), ++contagem);
+//					} else {
+//						rankingMeiosPublicacao.put(a.getOndePub(), 1);
+//					}
+//				}
+//				if (a.getReferencia() != null) {
+//					for (Artigo referencia : a.getReferencia()) {
+//						if (referencia.getOndePub() != null
+//								&& !referencia.getOndePub().equals("")
+//								&& referencia.getTitulo() != null
+//								&& !referencia.getTitulo().equals("")) {
+//							if (rankingMeiosPublicacao.containsKey(referencia
+//									.getOndePub())
+//									&& !listaArtigosVistos.contains(referencia
+//											.getTitulo())) {
+//								Integer contagem = rankingMeiosPublicacao
+//										.get(referencia.getOndePub());
+//								rankingMeiosPublicacao.put(
+//										referencia.getOndePub(), ++contagem);
+//							} else {
+//								rankingMeiosPublicacao.put(
+//										referencia.getOndePub(), 1);
+//							}
+//						}
+//					}
+//				}
+//			}
+//
+//			ValueComparator bvc = new ValueComparator(rankingMeiosPublicacao);
+//			TreeMap<String, Integer> sorted_map = new TreeMap<String, Integer>(
+//					bvc);
+//			sorted_map.putAll(rankingMeiosPublicacao);
+//			System.out.println("results: " + sorted_map);
 
 			// gerando rede de artigos
 			try {
 				PaperUtil.criaCabecalhoArtigo(true);
 				PaperUtil.criarNodosArtigo(listAux);
 				PaperUtil.criarArestasArtigo(listAux);
-				PaperUtil.criaArquivo("C:\\Users\\Moacir\\Desktop\\ARS\\GrafoDeArtigosRetornadosES2.graphml");
+				PaperUtil.criaArquivo("C:\\Users\\Moacir\\Desktop\\ARS\\GrafoDeArtigosRetornadosES3.graphml");
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}

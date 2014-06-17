@@ -15,6 +15,15 @@ public class Artigo {
 	private Set<Autor> autores;
 	private String keywords;
 	private Set<Artigo> referencia;
+	private Set<String> termos;
+
+	public Set<String> getTermos() {
+		return termos;
+	}
+
+	public void setTermos(Set<String> termos) {
+		this.termos = termos;
+	}
 
 	public Long getId() {
 		return id;

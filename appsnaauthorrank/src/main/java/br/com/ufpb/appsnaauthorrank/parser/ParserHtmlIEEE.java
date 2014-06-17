@@ -51,6 +51,11 @@ public class ParserHtmlIEEE implements Callable<List<Artigo>> {
 						artigo.setTitulo(H3.text().toLowerCase().replaceAll("&","and")
 								.replaceAll("[^\\p{L}\\p{Z}]", ""));
 					}
+					
+					if(artigo.getTitulo().equals("an operational approach to requirements specification for embedded systems")){
+						System.out.println();
+					}
+					
 					String textoDetail[] = detail.toString().split("\n");
 
 					artigo.setAutores(new HashSet<Autor>());
