@@ -32,7 +32,6 @@ public class ParserHtmlIEEEDetalhe implements Callable<Artigo> {
 
 	private Artigo artigo;
 	private List<Artigo> listArtigos;
-	private Long id;
 
 	public synchronized static Artigo realizarParserHtmlAllReferencies(
 			Artigo artigo) throws Exception {
@@ -298,7 +297,6 @@ public class ParserHtmlIEEEDetalhe implements Callable<Artigo> {
 						+ urlKeywords, 0);
 				doc = Jsoup.parse(paginaKeywords);
 				Elements elementsKeywords = doc.getElementsByClass("col-2");
-				artigo.setId(id);
 				artigo.setKeywords("");
 				if (elementsKeywords.size() == 0) {
 					Elements elementsAux = doc.getElementsByClass("col-1");
@@ -342,6 +340,10 @@ public class ParserHtmlIEEEDetalhe implements Callable<Artigo> {
 									+ ",");
 						}
 					}
+				}
+				
+				if(artigo.getTitulo().equals("an operational approach to requirements specification for embedded systems")){
+					System.out.println();
 				}
 
 				String urlReferencias = artigo.getLinkDetalhe().replace(
@@ -401,14 +403,6 @@ public class ParserHtmlIEEEDetalhe implements Callable<Artigo> {
 
 	public void setListArtigos(List<Artigo> listArtigos) {
 		this.listArtigos = listArtigos;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 }

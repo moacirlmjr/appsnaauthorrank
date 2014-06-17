@@ -7,8 +7,17 @@ public class Autor implements Comparable<Autor> {
 	private String nome;
 	private String abreviacao;
 	private Integer hindex;
+	private String instituicao;
 
 	private Set<Artigo> artigos;
+
+	public String getInstituicao() {
+		return instituicao;
+	}
+
+	public void setInstituicao(String instituicao) {
+		this.instituicao = instituicao;
+	}
 
 	public String getNome() {
 		return nome;

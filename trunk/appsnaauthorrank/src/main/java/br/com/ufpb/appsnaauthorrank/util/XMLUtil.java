@@ -85,6 +85,25 @@ public class XMLUtil {
 				.append("\n\t\t\t<data key=\"name\">").append(name)
 				.append("</data>").append("\n\t\t</node>");
 	}
+	
+	public static void generateNodesAutor(String name, String instituicao, Integer qteArtigos) {
+		arquivo.append("\n\t\t<node id=\"").append(name).append("\">")
+				.append("\n\t\t\t<data key=\"name\">").append(name)
+				.append("</data>").append("\n\t\t\t<data key=\"instituicao\">").append(instituicao)
+				.append("</data>").append("\n\t\t\t<data key=\"qteArtigos\">").append(qteArtigos)
+				.append("</data>").append("\n\t\t</node>");
+	}
+	
+	public static void generateNodesAutorWithColor(String name, String instituicao, Integer qteArtigos, Integer r, Integer g, Integer b) {
+		arquivo.append("\n\t\t<node id=\"").append(name).append("\">")
+				.append("\n\t\t\t<data key=\"name\">").append(name)
+				.append("</data>").append("\n\t\t\t<data key=\"instituicao\">").append(instituicao)
+				.append("</data>").append("\n\t\t\t<data key=\"r\">").append(r)
+				.append("</data>").append("\n\t\t\t<data key=\"g\">").append(g)
+				.append("</data>").append("\n\t\t\t<data key=\"b\">").append(b)
+				.append("</data>").append("\n\t\t\t<data key=\"qteArtigos\">").append(qteArtigos)
+				.append("</data>").append("\n\t\t</node>");
+	}
 
 	public static void generateNodes(String name, Integer year,
 			String journal, Integer referencia, String keywords,
