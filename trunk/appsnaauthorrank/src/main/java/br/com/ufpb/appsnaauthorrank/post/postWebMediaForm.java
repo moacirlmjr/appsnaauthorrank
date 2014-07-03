@@ -39,7 +39,7 @@ public class postWebMediaForm {
 			urlConnection.setConnectTimeout(TIMEOUT_VALUE);
 			urlConnection.setReadTimeout(TIMEOUT_VALUE);
 			InputStreamReader inputReader = new InputStreamReader(
-					urlConnection.getInputStream());
+					urlConnection.getInputStream(), "UTF-8");
 			BufferedReader bufferedReader = new BufferedReader(inputReader);
 
 			String linha = "";

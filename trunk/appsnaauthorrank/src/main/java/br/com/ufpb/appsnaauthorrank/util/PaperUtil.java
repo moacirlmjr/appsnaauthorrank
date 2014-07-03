@@ -1,5 +1,8 @@
 package br.com.ufpb.appsnaauthorrank.util;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -118,15 +121,15 @@ public class PaperUtil {
 
 	public static void criarNodosAutor(List<Artigo> list,
 			boolean colorByInstituicao) throws Exception {
-		
+
 		Map<Autor, List<Artigo>> mapAutores = new HashMap<>();
-		for(Artigo a: list){
-			for(Autor autor: a.getAutores()){
-				if(mapAutores.containsKey(autor)){
+		for (Artigo a : list) {
+			for (Autor autor : a.getAutores()) {
+				if (mapAutores.containsKey(autor)) {
 					List<Artigo> listAu = mapAutores.get(autor);
 					listAu.add(a);
 					mapAutores.put(autor, listAu);
-				}else{
+				} else {
 					List<Artigo> listAu = new ArrayList<>();
 					listAu.add(a);
 					mapAutores.put(autor, listAu);
@@ -145,13 +148,20 @@ public class PaperUtil {
 									.getRGBByInstituicao(autor.getInstituicao());
 							String[] rgbArray = rgb.split(";");
 							XMLUtil.generateNodesAutorWithColor(
-									autor.getNome(), autor.getInstituicao(), mapAutores.get(autor).size(),
+									autor.getNome(), autor.getInstituicao(),
+									mapAutores.get(autor).size(),
 									Integer.parseInt(rgbArray[1]),
 									Integer.parseInt(rgbArray[2]),
 									Integer.parseInt(rgbArray[3]));
 						} else {
-							XMLUtil.generateNodesAutor(autor.getNome(),
-									autor.getInstituicao(), mapAutores.get(autor).size());
+							String nome = Normalizer.normalize(autor.getNome().replaceAll("[^\\p{L}\\p{Z}]", ""), Normalizer.Form.NFD);
+							nome = nome.replaceAll("[^\\p{ASCII}]", "");
+							
+							String inst = Normalizer.normalize(autor.getInstituicao().replaceAll("[^\\p{L}\\p{Z}]", ""), Normalizer.Form.NFD);
+							inst = inst.replaceAll("[^\\p{ASCII}]", "");
+							XMLUtil.generateNodesAutorWithColor(
+									nome, inst,
+									mapAutores.get(autor).size(), 255, 0, 0);
 						}
 						listaNodes.add(autor.getNome());
 					}
@@ -175,19 +185,69 @@ public class PaperUtil {
 		}
 	}
 
-	public static void criarArestasAutor(List<Artigo> list) throws Exception {
+	public static void criarNodosTemas(List<Artigo> list) throws Exception {
+		
+		List<String> termosASeremDesconsiderados = new ArrayList<>();
+		FileReader fr = new FileReader("termoASeremRetirados.txt");
+		BufferedReader in = new BufferedReader(fr);
+		String line;
+		while ((line = in.readLine()) != null) {
+			String texto = Normalizer.normalize(line.replaceAll("[^\\p{L}\\p{Z}]", ""), Normalizer.Form.NFD);
+			texto = texto.replaceAll("[^\\p{ASCII}]", "");
+			termosASeremDesconsiderados.add(texto);
+		}
 
+		XMLUtil.addSpace(2);
+		List<String> listaNodes = new ArrayList<String>();
+		for(Artigo artigo:list){
+			for (String tema : artigo.getTitulo().toLowerCase().split(" ")) {
+				String texto = Normalizer.normalize(tema.replaceAll("[^\\p{L}\\p{Z}]", ""), Normalizer.Form.NFD);
+				texto = texto.replaceAll("[^\\p{ASCII}]", "");
+				if (!texto.equals("") && !termosASeremDesconsiderados.contains(texto) && verificar(texto, listaNodes) ) {
+					XMLUtil.generateNodesTemaWithColor(texto, 0, 0, 255);
+					listaNodes.add(texto);
+				}
+				
+			}
+		}
+	}
+
+	public static void criarArestasAutor(List<Artigo> list, boolean redeBipartidaComTemas) throws Exception {
+
+		List<String> termosASeremDesconsiderados = new ArrayList<>();
+		FileReader fr = new FileReader("termoASeremRetirados.txt");
+		BufferedReader in = new BufferedReader(fr);
+		String line;
+		while ((line = in.readLine()) != null) {
+			String texto = Normalizer.normalize(line.replaceAll("[^\\p{L}\\p{Z}]", ""), Normalizer.Form.NFD);
+			texto = texto.replaceAll("[^\\p{ASCII}]", "");
+			termosASeremDesconsiderados.add(texto);
+		}
+		
 		XMLUtil.addSpace(2);
 
 		for (Artigo paper : list) {
 			if (paper.getAutores() != null) {
 				for (Autor a : paper.getAutores()) {
-					for (Autor a2 : paper.getAutores()) {
-						if (a.getNome() != null
-								&& !a.getNome().equals(a2.getNome())
-								&& a2.getNome() != null
-								&& !a2.getNome().equals("")) {
-							XMLUtil.generateEdges(a.getNome(), a2.getNome(), 1);
+					if(!redeBipartidaComTemas){
+						for (Autor a2 : paper.getAutores()) {
+							if (a.getNome() != null
+									&& !a.getNome().equals(a2.getNome())
+									&& a2.getNome() != null
+									&& !a2.getNome().equals("")) {
+								XMLUtil.generateEdges(a.getNome(), a2.getNome(), 1);
+							}
+						}
+					}else{
+						for(String tema: paper.getTitulo().split(" ")){
+							String texto = Normalizer.normalize(tema.replaceAll("[^\\p{L}\\p{Z}]", ""), Normalizer.Form.NFD);
+							texto = texto.replaceAll("[^\\p{ASCII}]", "");
+							
+							String nome = Normalizer.normalize(a.getNome().replaceAll("[^\\p{L}\\p{Z}]", ""), Normalizer.Form.NFD);
+							nome = nome.replaceAll("[^\\p{ASCII}]", "");
+							if(!texto.equals("") && !termosASeremDesconsiderados.contains(texto)){
+								XMLUtil.generateEdges(nome,texto, 1);
+							}
 						}
 					}
 				}
@@ -216,6 +276,37 @@ public class PaperUtil {
 			// }
 			// }
 
+		}
+
+	}
+	
+	public static void criarArestasTema(List<Artigo> list) throws Exception {
+		
+		List<String> termosASeremDesconsiderados = new ArrayList<>();
+		FileReader fr = new FileReader("termoASeremRetirados.txt");
+		BufferedReader in = new BufferedReader(fr);
+		String line;
+		while ((line = in.readLine()) != null) {
+			String texto = Normalizer.normalize(line.replaceAll("[^\\p{L}\\p{Z}]", ""), Normalizer.Form.NFD);
+			texto = texto.replaceAll("[^\\p{ASCII}]", "");
+			termosASeremDesconsiderados.add(texto);
+		}
+
+		XMLUtil.addSpace(2);
+
+		for (Artigo paper : list) {
+			for(String tema: paper.getTitulo().split(" ")){
+				String texto = Normalizer.normalize(tema.replaceAll("[^\\p{L}\\p{Z}]", ""), Normalizer.Form.NFD);
+				texto = texto.replaceAll("[^\\p{ASCII}]", "");
+				
+				for(String tema2: paper.getTitulo().split(" ")){
+					String texto2 = Normalizer.normalize(tema2.replaceAll("[^\\p{L}\\p{Z}]", ""), Normalizer.Form.NFD);
+					texto2 = texto2.replaceAll("[^\\p{ASCII}]", "");
+					if(!texto.equals("") && !texto2.equals("") && !termosASeremDesconsiderados.contains(texto) && !termosASeremDesconsiderados.contains(texto2)){
+						XMLUtil.generateEdges(texto,texto2, 1);
+					}
+				}
+			}
 		}
 
 	}

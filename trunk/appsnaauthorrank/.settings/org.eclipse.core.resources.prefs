@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
 encoding//src/main/java/br/com/ufpb/appsnaauthorrank/main/GerarGraphMLWebMedia.java=ISO-8859-1
-encoding//src/main/java/br/com/ufpb/appsnaauthorrank/parser/ParserHtmlWebMedia.java=UTF-8
+encoding//src/main/java/br/com/ufpb/appsnaauthorrank/parser/ParserHtmlWebMedia.java=ISO-8859-1
 encoding//src/main/java/br/com/ufpb/appsnaauthorrank/post/PostFreeCiteApi.java=UTF-8
+encoding//src/main/java/br/com/ufpb/appsnaauthorrank/post/postWebMediaForm.java=UTF-8

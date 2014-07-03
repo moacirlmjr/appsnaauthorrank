@@ -1,5 +1,6 @@
 package br.com.ufpb.appsnaauthorrank.parser;
 
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import br.com.ufpb.appsnaauthorrank.beans.Artigo;
 import br.com.ufpb.appsnaauthorrank.beans.Autor;
 import br.com.ufpb.appsnaauthorrank.beans.Evento;
 import br.com.ufpb.appsnaauthorrank.post.postWebMediaForm;
+import br.com.ufpb.appsnaauthorrank.util.HtmlManipulator;
 
 public class ParserHtmlWebMedia {
 

@@ -27,41 +27,43 @@ public class GerarGraphMLWebMedia {
 
 			for (Evento evento : listEventos) {
 				listArtigo.addAll(evento.getArtigos());
-				for (Artigo a : listArtigo) {
-					for (Autor au : a.getAutores()) {
-						listInstituicoes.put(au.getInstituicao(),
-								au.getInstituicao());
-					}
-				}
-				PaperUtil.criaCabecalhoAutor(false, true);
-				PaperUtil.criarNodosAutor(evento.getArtigos(), true);
-				PaperUtil.criarArestasAutor(evento.getArtigos());
-				PaperUtil
-						.criaArquivo("C:\\Users\\Moacir\\Desktop\\ARS\\WebMedia\\GrafoWebMedia"
-								+ count + ".graphml");
-				XMLUtil.arquivo = new StringBuffer(
-						"<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-						.append("\n<!-- GraphML gerado eautomaticamente pela AppSNA -->")
-						.append("\n<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\">");
-				count++;
+//				for (Artigo a : listArtigo) {
+//					for (Autor au : a.getAutores()) {
+//						listInstituicoes.put(au.getInstituicao(),
+//								au.getInstituicao());
+//					}
+//				}
+//				PaperUtil.criaCabecalhoAutor(false, true);
+//				PaperUtil.criarNodosAutor(evento.getArtigos(), true);
+//				PaperUtil.criarArestasAutor(evento.getArtigos());
+//				PaperUtil
+//						.criaArquivo("C:\\Users\\Moacir\\Desktop\\ARS\\WebMedia\\GrafoWebMedia"
+//								+ count + ".graphml");
+//				XMLUtil.arquivo = new StringBuffer(
+//						"<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+//						.append("\n<!-- GraphML gerado eautomaticamente pela AppSNA -->")
+//						.append("\n<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\">");
+//				count++;
 			}
 
-			quantidadeCoautoresPorArtigo(listArtigo);
-
-			quantidadedeArtigosPorAutor(listArtigo);
-
-			quantidadedeArtigosPorCoautor(listArtigo);
-
-			System.out.println("Instituições");
-			for (String key : listInstituicoes.keySet()) {
-				System.out.println(key);
-			}
-
+//			quantidadeCoautoresPorArtigo(listArtigo);
+//
+//			quantidadedeArtigosPorAutor(listArtigo);
+//
+//			quantidadedeArtigosPorCoautor(listArtigo);
+//
+//			System.out.println("Instituições");
+//			for (String key : listInstituicoes.keySet()) {
+//				System.out.println(key);
+//			}
+			
 			PaperUtil.criaCabecalhoAutor(false, true);
-			PaperUtil.criarNodosAutor(listArtigo, true);
-			PaperUtil.criarArestasAutor(listArtigo);
+			PaperUtil.criarNodosAutor(listArtigo, false);
+			PaperUtil.criarNodosTemas(listArtigo);
+			PaperUtil.criarArestasAutor(listArtigo,true);
+			PaperUtil.criarArestasTema(listArtigo);
 			PaperUtil
-					.criaArquivo("C:\\Users\\Moacir\\Desktop\\ARS\\WebMedia\\GrafoWebMediaTOTAL.graphml");
+					.criaArquivo("C:\\Users\\Moacir\\Desktop\\ARS\\GrafoWebMediaBipartidoTOTAL.graphml");
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
