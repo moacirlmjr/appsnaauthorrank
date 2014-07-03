@@ -104,6 +104,17 @@ public class XMLUtil {
 				.append("</data>").append("\n\t\t\t<data key=\"qteArtigos\">").append(qteArtigos)
 				.append("</data>").append("\n\t\t</node>");
 	}
+	
+	public static void generateNodesTemaWithColor(String name, Integer r, Integer g, Integer b) {
+		arquivo.append("\n\t\t<node id=\"").append(name).append("\">")
+				.append("\n\t\t\t<data key=\"name\">").append(name)
+				.append("</data>").append("\n\t\t\t<data key=\"instituicao\">").append("sem")
+				.append("</data>").append("\n\t\t\t<data key=\"r\">").append(r)
+				.append("</data>").append("\n\t\t\t<data key=\"g\">").append(g)
+				.append("</data>").append("\n\t\t\t<data key=\"b\">").append(b)
+				.append("</data>").append("\n\t\t\t<data key=\"qteArtigos\">").append(0)
+				.append("</data>").append("\n\t\t</node>");
+	}
 
 	public static void generateNodes(String name, Integer year,
 			String journal, Integer referencia, String keywords,
