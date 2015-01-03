@@ -33,11 +33,9 @@ public class ParserHtmlIEEE implements Callable<List<Artigo>> {
 
 			if (e.className().equalsIgnoreCase(SEARCH_RESULTS)) {
 				if (e.getElementsByClass(LIST_ARTIGOS).isEmpty()) {
-					System.out.println("pagina sem artigo");
 					return null;
-				} else {
-					System.out.println("tem artigo");
 				}
+
 				for (Element subE : e.getElementsByClass(LIST_ARTIGOS)) {
 					Boolean test = new Boolean(false);
 					Artigo artigo = new Artigo();
@@ -45,17 +43,20 @@ public class ParserHtmlIEEE implements Callable<List<Artigo>> {
 					Element H3 = detail.getElementsByTag("h3").first();
 					if (H3.getElementsByTag("a").first() != null) {
 						artigo.setTitulo(H3.getElementsByTag("a").first()
-								.text().toLowerCase().replaceAll("&","and")
+								.text().toLowerCase().replaceAll("&", "and")
 								.replaceAll("[^\\p{L}\\p{Z}]", ""));
 					} else {
-						artigo.setTitulo(H3.text().toLowerCase().replaceAll("&","and")
+						artigo.setTitulo(H3.text().toLowerCase()
+								.replaceAll("&", "and")
 								.replaceAll("[^\\p{L}\\p{Z}]", ""));
 					}
-					
-					if(artigo.getTitulo().equals("an operational approach to requirements specification for embedded systems")){
+
+					if (artigo
+							.getTitulo()
+							.equals("an operational approach to requirements specification for embedded systems")) {
 						System.out.println();
 					}
-					
+
 					String textoDetail[] = detail.toString().split("\n");
 
 					artigo.setAutores(new HashSet<Autor>());
@@ -92,7 +93,8 @@ public class ParserHtmlIEEE implements Callable<List<Artigo>> {
 						} else if (texto.contains("RecentIssue.jsp")) {
 							Document doc2 = Jsoup.parseBodyFragment(texto);
 							Element link = doc2.body();
-							artigo.setOndePub(link.text().replaceAll("&","and"));
+							artigo.setOndePub(link.text()
+									.replaceAll("&", "and"));
 						} else if (texto.contains("stamp.jsp?")) {
 							Document doc2 = Jsoup.parseBodyFragment(texto);
 							Element linkDownloadElement = doc2.body();
@@ -121,9 +123,11 @@ public class ParserHtmlIEEE implements Callable<List<Artigo>> {
 				}
 			}
 		}
+		System.out.println("Metadados das Publicações da Página " + page
+				+ " obtidos");
 		return artigos;
 	}
-	
+
 	public static Integer getLastPage(String html) throws Exception {
 
 		Document doc = Jsoup.parse(html);
@@ -134,7 +138,7 @@ public class ParserHtmlIEEE implements Callable<List<Artigo>> {
 
 		return null;
 	}
-	
+
 	public String getQuery() {
 		return query;
 	}
@@ -150,9 +154,12 @@ public class ParserHtmlIEEE implements Callable<List<Artigo>> {
 	public void setPage(Integer page) {
 		this.page = page;
 	}
-	
+
 	@Override
 	public List<Artigo> call() throws Exception {
+		System.out
+				.println("Iniciando obtenção de Metadados das Publicações da Página "
+						+ page);
 		return realizarParserHtml(postIeeeForm.post(query, page));
 	}
 

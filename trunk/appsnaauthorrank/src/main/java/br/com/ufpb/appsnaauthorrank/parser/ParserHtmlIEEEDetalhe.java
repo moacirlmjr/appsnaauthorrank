@@ -341,38 +341,45 @@ public class ParserHtmlIEEEDetalhe implements Callable<Artigo> {
 						}
 					}
 				}
-				
-				if(artigo.getTitulo().equals("an operational approach to requirements specification for embedded systems")){
-					System.out.println();
-				}
+
+				System.out.println("Número de Keywords Identificadas para o artigo " + artigo.getTitulo() +": "
+						+ (artigo.getKeywords().equals("") ? 0 : artigo
+								.getKeywords().split(",").length));
 
 				String urlReferencias = artigo.getLinkDetalhe().replace(
 						"articleDetails", "abstractReferences");
 				String pagina = postIeeeForm.obterPagina(URL_IEEE
 						+ urlReferencias, 0);
 				doc = Jsoup.parse(pagina);
-				System.out.println("REFERENCIAS OBTIDAS");
 				if (!doc.select(".docs").isEmpty()) {
 					Elements elements = doc.select(".docs li");
 					for (Element ref : elements) {
 						Elements elementsLink = ref.select("a");
-						if(elementsLink.size() > 0){
-							for(Element link: elementsLink){
-								if(link.text().equalsIgnoreCase("abstract")){
+						if (elementsLink.size() > 0) {
+							for (Element link : elementsLink) {
+								if (link.text().equalsIgnoreCase("abstract")) {
 									String hrefReferencia = link.attr("href");
-									String paginaDetalheRef = postIeeeForm.obterPagina(URL_IEEE
-											+ hrefReferencia, 0);
-									Document docReferencia = Jsoup.parse(paginaDetalheRef);
-									Elements title = docReferencia.getElementsByClass("title");
-									if(title.size() > 0){
+									String paginaDetalheRef = postIeeeForm
+											.obterPagina(URL_IEEE
+													+ hrefReferencia, 0);
+									if(paginaDetalheRef == null){
+										System.out.println();
+									}
+									Document docReferencia = Jsoup
+											.parse(paginaDetalheRef);
+									Elements title = docReferencia
+											.getElementsByClass("title");
+									if (title.size() > 0) {
 										Element titulo = title.get(0);
-										String referenciaText = titulo.text().toLowerCase()
+										String referenciaText = titulo
+												.text()
+												.toLowerCase()
 												.replace("(7043):814-8", "")
 												.replace(", 14333-14337. ", "")
-												.replaceAll("[^\\p{L}\\p{Z}]", "");
+												.replaceAll("[^\\p{L}\\p{Z}]",
+														"");
 										Artigo referencia = verificarReferenciaEmListaArtigos(referenciaText);
 										if (referencia != null) {
-											System.out.println("---->  " + referenciaText);
 											referencias.add(referencia);
 										}
 									}
@@ -380,7 +387,11 @@ public class ParserHtmlIEEEDetalhe implements Callable<Artigo> {
 							}
 						}
 					}
+					
 					artigo.setReferencia(new HashSet<Artigo>(referencias));
+
+					System.out.println("Número de Citações Identificadas para o artigo " + artigo.getTitulo() +": "
+							+ artigo.getReferencia().size());
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

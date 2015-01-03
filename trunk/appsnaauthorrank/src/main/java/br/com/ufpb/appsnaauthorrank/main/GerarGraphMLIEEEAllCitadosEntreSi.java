@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -15,27 +15,35 @@ import br.com.ufpb.appsnaauthorrank.beans.Artigo;
 import br.com.ufpb.appsnaauthorrank.parser.ParserHtmlIEEE;
 import br.com.ufpb.appsnaauthorrank.parser.ParserHtmlIEEEDetalhe;
 import br.com.ufpb.appsnaauthorrank.post.postIeeeForm;
-import br.com.ufpb.appsnaauthorrank.util.PaperUtil;
-import br.com.ufpb.appsnaauthorrank.util.ValueComparator;
+import br.com.ufpb.appsnaauthorrank.util.NetworkUtil;
 
 public class GerarGraphMLIEEEAllCitadosEntreSi {
 
 	private static final int ACTIVES_TASK = 2;
-	private static final int QTE_THREADS_EXEC = 50;
+	private static final int QTE_THREADS_EXEC = 5;
 	private static final int NTHREADS = Runtime.getRuntime().availableProcessors()*4;
 	private static final ExecutorService exec = Executors.newFixedThreadPool(NTHREADS);
 
 	public static void main(String[] args) {
 		try {
 			List<Artigo> listArtigos = new ArrayList<>(); 
+			Scanner sn = new Scanner(System.in);
 
-			String query = "\"Embedded System\"";
+			System.out.println("######################### PAPERCRAWLER #########################");
+			System.out.print("Digite o Seu termo de busca: ");
+			String query = sn.nextLine();
+			
+			System.err.println("Termo de Busca Escolhido: " + query);
+			System.out.println("######################### INICIANDO BUSCA #########################");
+			System.out.println("* Atualmente o sistema só realiza busca no IEEEXplorer");
+			
 			
 			Integer lastPage = ParserHtmlIEEE.getLastPage(
 					postIeeeForm
 					.post(query,
 							1));
 			int count = 0;
+			System.out.println("Quantidade de Páginas Encontradas: " + lastPage);
 			Map<Integer, Future<List<Artigo>>> mapArtigosRetornadosCall = new HashMap<>();
 			for(int i = 1; i<=lastPage;i++){
 				ParserHtmlIEEE parser = new ParserHtmlIEEE();
@@ -58,14 +66,17 @@ public class GerarGraphMLIEEEAllCitadosEntreSi {
 					mapArtigosRetornadosCall = new HashMap<>();
 				}
 				count++;
+				if(count == 5){
+					break;
+				}
 			}
 			
+			System.out.println("######################### INICIANDO IDENTIFICAÇÃO DAS CITAÇÕES #########################");
+			System.out.println("* As citações consideradas só são aquelas que são indexadas pelo ieeexplorer e aparecem na lista de publicações iniciais");
 			List<Future<Artigo>> listArtigosCall = new LinkedList<>();
-			// obter as referencias e atualizar artigos
 			count = 0;
 			List<Artigo> listAux = new LinkedList<Artigo>();
 			for (Artigo a : listArtigos) {
-				System.out.println(a.getTitulo());
 				if (a.getTitulo() != null){
 					ParserHtmlIEEEDetalhe parserDetalhe = new ParserHtmlIEEEDetalhe();
 					parserDetalhe.setArtigo(a);
@@ -138,10 +149,7 @@ public class GerarGraphMLIEEEAllCitadosEntreSi {
 
 			// gerando rede de artigos
 			try {
-				PaperUtil.criaCabecalhoArtigo(true);
-				PaperUtil.criarNodosArtigo(listAux);
-				PaperUtil.criarArestasArtigo(listAux);
-				PaperUtil.criaArquivo("C:\\Users\\Moacir\\Desktop\\ARS\\GrafoDeArtigosRetornadosES3.graphml");
+				NetworkUtil.gerarRedePublicacoes(listAux);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}

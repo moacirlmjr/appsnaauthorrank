@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class URLUtil {
 
@@ -36,12 +38,12 @@ public class URLUtil {
 		return linhaRetorno;
 	}
 
-	public static void main(String[] args) {
-		System.out
-				.println(obterResultadoUrl("http://ieeexplore.ieee.org/search/searchresult.jsp?newsearch=true&queryText=SNA+online&x=0&y=0"));
+	public static void main(String[] args) throws IOException {
 		
-		System.out
-		.println(obterResultadoUrl("http://ieeexplore.ieee.org/search/searchresult.jsp?queryText%3DSNA+online&pageNumber=2"));
+		for(int i = 1; i <= 26; i++){
+			String html = obterResultadoUrl("http://link.springer.com/search/page/"+i+"?date-facet-mode=between&query=%22social+network+analysis%22+and+online&facet-start-year=2013&facet-end-year=2014&facet-content-type=%22Article%22");
+			Files.write(Paths.get(".\\Search Results - Springer" + i +".html"), html.getBytes());
+		}
 	}
 
 }
