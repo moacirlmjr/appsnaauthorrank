@@ -95,21 +95,22 @@ public class NetworkUtil {
 					break;
 				}
 			}
-
-			for (Artigo referencia : artigo.getReferencia()) {
-				Node nodeReferencia = null;
-				for (Node n : graph.getNodes().toArray()) {
-					if (((String) n.getAttributes().getValue("label"))
-							.equals(referencia.getTitulo())) {
-						nodeReferencia = n;
-						break;
+			if(artigo.getReferencia()!=null){
+				for (Artigo referencia : artigo.getReferencia()) {
+					Node nodeReferencia = null;
+					for (Node n : graph.getNodes().toArray()) {
+						if (((String) n.getAttributes().getValue("label"))
+								.equals(referencia.getTitulo())) {
+							nodeReferencia = n;
+							break;
+						}
 					}
-				}
-
-				if (nodeArtigo != null && nodeReferencia != null) {
-					Edge e1 = graphModel.factory().newEdge(nodeArtigo,
-							nodeReferencia, 0f, true);
-					graph.addEdge(e1);
+					
+					if (nodeArtigo != null && nodeReferencia != null) {
+						Edge e1 = graphModel.factory().newEdge(nodeArtigo,
+								nodeReferencia, 0f, true);
+						graph.addEdge(e1);
+					}
 				}
 			}
 
@@ -169,6 +170,8 @@ public class NetworkUtil {
 		NodeColorTransformer nodeColorTransformer = new NodeColorTransformer();
 		nodeColorTransformer.randomizeColors(p);
 		partitionController.transform(p, nodeColorTransformer);
+		
+		System.out.println("Quantidade de Comunidades Identificadas: " + p.getElementsCount());
 
 		System.out.println("Distribuindo a Rede por YifanHU e Noverlap");
 		YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));

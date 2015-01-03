@@ -362,25 +362,24 @@ public class ParserHtmlIEEEDetalhe implements Callable<Artigo> {
 									String paginaDetalheRef = postIeeeForm
 											.obterPagina(URL_IEEE
 													+ hrefReferencia, 0);
-									if(paginaDetalheRef == null){
-										System.out.println();
-									}
-									Document docReferencia = Jsoup
-											.parse(paginaDetalheRef);
-									Elements title = docReferencia
-											.getElementsByClass("title");
-									if (title.size() > 0) {
-										Element titulo = title.get(0);
-										String referenciaText = titulo
-												.text()
-												.toLowerCase()
-												.replace("(7043):814-8", "")
-												.replace(", 14333-14337. ", "")
-												.replaceAll("[^\\p{L}\\p{Z}]",
-														"");
-										Artigo referencia = verificarReferenciaEmListaArtigos(referenciaText);
-										if (referencia != null) {
-											referencias.add(referencia);
+									if(paginaDetalheRef != null){
+										Document docReferencia = Jsoup
+												.parse(paginaDetalheRef);
+										Elements title = docReferencia
+												.getElementsByClass("title");
+										if (title.size() > 0) {
+											Element titulo = title.get(0);
+											String referenciaText = titulo
+													.text()
+													.toLowerCase()
+													.replace("(7043):814-8", "")
+													.replace(", 14333-14337. ", "")
+													.replaceAll("[^\\p{L}\\p{Z}]",
+															"");
+											Artigo referencia = verificarReferenciaEmListaArtigos(referenciaText);
+											if (referencia != null) {
+												referencias.add(referencia);
+											}
 										}
 									}
 								}
