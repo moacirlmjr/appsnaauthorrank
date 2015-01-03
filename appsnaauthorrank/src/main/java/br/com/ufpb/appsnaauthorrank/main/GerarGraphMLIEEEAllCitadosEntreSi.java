@@ -66,9 +66,6 @@ public class GerarGraphMLIEEEAllCitadosEntreSi {
 					mapArtigosRetornadosCall = new HashMap<>();
 				}
 				count++;
-				if(count == 5){
-					break;
-				}
 			}
 			
 			System.out.println("######################### INICIANDO IDENTIFICAÇÃO DAS CITAÇÕES #########################");
