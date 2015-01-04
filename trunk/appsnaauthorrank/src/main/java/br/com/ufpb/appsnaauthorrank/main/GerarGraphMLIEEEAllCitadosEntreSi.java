@@ -155,7 +155,7 @@ public class GerarGraphMLIEEEAllCitadosEntreSi {
 
 			// gerando rede de artigos
 			try {
-				NetworkUtil.gerarRedePublicacoes(listAux);
+				NetworkUtil.gerarRedePublicacoes(listArtigos);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
@@ -170,8 +170,8 @@ public class GerarGraphMLIEEEAllCitadosEntreSi {
 					anoMap.put(a.getPubYear(), 1 + anoMap.get(a.getPubYear()));
 				}
 			}
-			
-			System.out.println("Evolução de publicações ao longo dos anos: " + anoMap);
+//			
+//			System.out.println("Evolução de publicações ao longo dos anos: " + anoMap);
 
 			// try {
 			// criaCabecalhoAutor(true);
