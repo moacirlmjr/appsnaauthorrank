@@ -23,6 +23,7 @@ import br.com.ufpb.appsnaauthorrank.main.GerarGraphMLIEEEAllReferencies;
 import br.com.ufpb.appsnaauthorrank.post.PostFreeCiteApi;
 import br.com.ufpb.appsnaauthorrank.post.PostParaCiteApi;
 import br.com.ufpb.appsnaauthorrank.post.postIeeeForm;
+import br.com.ufpb.appsnaauthorrank.util.URLUtil;
 
 public class ParserHtmlIEEEDetalhe implements Callable<Artigo> {
 
@@ -291,57 +292,22 @@ public class ParserHtmlIEEEDetalhe implements Callable<Artigo> {
 			Document doc = null;
 
 			try {
-				String urlKeywords = artigo.getLinkDetalhe().replace(
-						"articleDetails", "abstractKeywords");
-				String paginaKeywords = postIeeeForm.obterPagina(URL_IEEE
-						+ urlKeywords, 0);
-				doc = Jsoup.parse(paginaKeywords);
-				Elements elementsKeywords = doc.getElementsByClass("col-2");
+				String urlKeywords = "http://ieeexplore.ieee.org/xpl/downloadCitations?reload=true";
+				String numArtigo = artigo.getLinkDetalhe().split("&")[1].replace("arnumber=", "");
+				String params = "recordIds="+numArtigo+"&citations-format=citation-only&download-format=download-bibtex&x=93&y=11";
+				String bibtex = postIeeeForm.obterResultadoUrlPOST(urlKeywords, params);
 				artigo.setKeywords("");
-				if (elementsKeywords.size() == 0) {
-					Elements elementsAux = doc.getElementsByClass("col-1");
-					for (Element e : elementsAux) {
-						Elements elementsAux2 = e.getElementsByClass("section");
-						if (elementsAux2.size() == 0) {
-							Elements elementsAuxCol1 = doc
-									.getElementsByClass("col");
-							for (Element e2 : elementsAuxCol1) {
-								Elements elementsAuxSection = e2
-										.getElementsByClass("section");
-								for (Element e3 : elementsAuxSection) {
-									Elements links = e3.getElementsByTag("a");
-									for (Element link : links) {
-										String keyword = link.text();
-										artigo.setKeywords(artigo.getKeywords()
-												+ keyword + ",");
-									}
-								}
-
-							}
-
-						} else {
-							for (Element e2 : elementsAux2) {
-								Elements links = e2.getElementsByTag("a");
-								for (Element link : links) {
-									String keyword = link.text();
-									artigo.setKeywords(artigo.getKeywords()
-											+ keyword + ", ");
-								}
-							}
-						}
-
-					}
-				} else {
-					for (Element e : elementsKeywords) {
-						Elements links = e.getElementsByTag("a");
-						for (Element link : links) {
-							String keyword = link.text();
-							artigo.setKeywords(artigo.getKeywords() + keyword
-									+ ",");
+				
+				if(bibtex != null){
+					String itensBibtex[] = bibtex.split("<br>");
+					for(String itemBibtex :itensBibtex){
+						if(itemBibtex.contains("keywords=")){
+							String keywords = itemBibtex.replace(" keywords=", "").replace("{", "").replace("}", "").replaceAll(";",",");
+							artigo.setKeywords(keywords);
 						}
 					}
 				}
-
+				
 				System.out.println("Número de Keywords Identificadas para o artigo " + artigo.getTitulo() +": "
 						+ (artigo.getKeywords().equals("") ? 0 : artigo
 								.getKeywords().split(",").length));
