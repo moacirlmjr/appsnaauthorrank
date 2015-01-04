@@ -20,7 +20,7 @@ import br.com.ufpb.appsnaauthorrank.util.NetworkUtil;
 public class GerarGraphMLIEEEAllCitadosEntreSi {
 
 	private static final int ACTIVES_TASK = 2;
-	private static final int QTE_THREADS_EXEC = 5;
+	private static final int QTE_THREADS_EXEC = 50;
 	private static final int NTHREADS = Runtime.getRuntime().availableProcessors()*4;
 	private static final ExecutorService exec = Executors.newFixedThreadPool(NTHREADS);
 

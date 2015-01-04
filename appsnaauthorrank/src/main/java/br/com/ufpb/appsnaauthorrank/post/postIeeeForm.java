@@ -1,11 +1,23 @@
 package br.com.ufpb.appsnaauthorrank.post;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 
 public class postIeeeForm {
 
@@ -56,5 +68,45 @@ public class postIeeeForm {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public static String obterResultadoUrlPOST(String urlString,
+			String parametros) throws Exception {
+		String linha = "";
+		String linhaRetorno = "";
+
+		HttpClient httpclient = new DefaultHttpClient();
+		HttpPost httppost = new HttpPost(urlString);
+
+		// Request parameters and other properties.
+		if (parametros != null) {
+			List<NameValuePair> params = new ArrayList<NameValuePair>(2);
+			for (String param : parametros.split("\\&")) {
+				String[] p = param.split("=");
+				params.add(new BasicNameValuePair(p[0], p.length == 2 ? p[1]
+						: ""));
+			}
+			httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+		}
+
+		// Execute and get the response.
+		HttpResponse response = httpclient.execute(httppost);
+		HttpEntity entity = response.getEntity();
+
+		if (entity != null) {
+			entity = response.getEntity();
+			InputStream instream = entity.getContent();
+			try {
+				InputStreamReader isr = new InputStreamReader(instream);
+				BufferedReader br = new BufferedReader(isr);
+				while ((linha = br.readLine()) != null) {
+					linhaRetorno += linha;
+				}
+			} finally {
+				instream.close();
+			}
+			
+		}
+		return linhaRetorno;
 	}
 }

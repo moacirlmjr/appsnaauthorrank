@@ -65,7 +65,7 @@ public class NetworkUtil {
 							&& artigo.getKeywords().equals("") ? "No Keyword"
 							: artigo.getKeywords());
 			n0.getAttributes().setValue("authors",
-					artigo.getAutores() != null ? artigo.getAutores() : "");
+					artigo.getAutores() != null ? artigo.getAutores().toString() : "");
 
 			Graph graph = graphModel.getDirectedGraph();
 

@@ -51,12 +51,6 @@ public class ParserHtmlIEEE implements Callable<List<Artigo>> {
 								.replaceAll("[^\\p{L}\\p{Z}]", ""));
 					}
 
-					if (artigo
-							.getTitulo()
-							.equals("an operational approach to requirements specification for embedded systems")) {
-						System.out.println();
-					}
-
 					String textoDetail[] = detail.toString().split("\n");
 
 					artigo.setAutores(new HashSet<Autor>());
