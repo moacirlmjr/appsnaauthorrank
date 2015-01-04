@@ -18,6 +18,9 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 
 public class postIeeeForm {
 
@@ -36,12 +39,12 @@ public class postIeeeForm {
 			e.printStackTrace();
 		}
 
-		return obterPagina(data,0);
+		return obterPagina(data, 0);
 	}
 
 	public static String obterPagina(String caminho, Integer countConnections) {
 		try {
-			if(countConnections >= 3){
+			if (countConnections >= 3) {
 				return null;
 			}
 			URL url = new URL(caminho);
@@ -63,50 +66,55 @@ public class postIeeeForm {
 
 			return pag.toString();
 		} catch (SocketTimeoutException e) {
-			return obterPagina(caminho,countConnections+1);
+			return obterPagina(caminho, countConnections + 1);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
-	
+
 	public static String obterResultadoUrlPOST(String urlString,
 			String parametros) throws Exception {
-		String linha = "";
-		String linhaRetorno = "";
+		try {
+			String linha = "";
+			String linhaRetorno = "";
 
-		HttpClient httpclient = new DefaultHttpClient();
-		HttpPost httppost = new HttpPost(urlString);
+			HttpClient httpclient = new DefaultHttpClient();
+			HttpPost httppost = new HttpPost(urlString);
 
-		// Request parameters and other properties.
-		if (parametros != null) {
-			List<NameValuePair> params = new ArrayList<NameValuePair>(2);
-			for (String param : parametros.split("\\&")) {
-				String[] p = param.split("=");
-				params.add(new BasicNameValuePair(p[0], p.length == 2 ? p[1]
-						: ""));
-			}
-			httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-		}
-
-		// Execute and get the response.
-		HttpResponse response = httpclient.execute(httppost);
-		HttpEntity entity = response.getEntity();
-
-		if (entity != null) {
-			entity = response.getEntity();
-			InputStream instream = entity.getContent();
-			try {
-				InputStreamReader isr = new InputStreamReader(instream);
-				BufferedReader br = new BufferedReader(isr);
-				while ((linha = br.readLine()) != null) {
-					linhaRetorno += linha;
+			// Request parameters and other properties.
+			if (parametros != null) {
+				List<NameValuePair> params = new ArrayList<NameValuePair>(2);
+				for (String param : parametros.split("\\&")) {
+					String[] p = param.split("=");
+					params.add(new BasicNameValuePair(p[0],
+							p.length == 2 ? p[1] : ""));
 				}
-			} finally {
-				instream.close();
+				httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
 			}
-			
+
+			// Execute and get the response.
+			HttpResponse response = httpclient.execute(httppost);
+			HttpEntity entity = response.getEntity();
+
+			if (entity != null) {
+				entity = response.getEntity();
+				InputStream instream = entity.getContent();
+				try {
+					InputStreamReader isr = new InputStreamReader(instream);
+					BufferedReader br = new BufferedReader(isr);
+					while ((linha = br.readLine()) != null) {
+						linhaRetorno += linha;
+					}
+				} finally {
+					instream.close();
+				}
+
+			}
+			return linhaRetorno;
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		return linhaRetorno;
+		return null;
 	}
 }

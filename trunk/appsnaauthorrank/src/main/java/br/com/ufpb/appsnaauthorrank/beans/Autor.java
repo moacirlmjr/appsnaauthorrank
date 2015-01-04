@@ -71,4 +71,11 @@ public class Autor implements Comparable<Autor> {
 		return this.getNome().compareTo(t.getNome());
 	}
 
+	@Override
+	public String toString() {
+		return nome;
+	}
+	
+	
+
 }
