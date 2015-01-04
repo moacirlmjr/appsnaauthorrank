@@ -2,7 +2,9 @@ package br.com.ufpb.appsnaauthorrank.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.gephi.data.attributes.api.AttributeColumn;
 import org.gephi.data.attributes.api.AttributeController;
@@ -15,6 +17,7 @@ import org.gephi.graph.api.Node;
 import org.gephi.io.exporter.api.ExportController;
 import org.gephi.layout.plugin.force.StepDisplacement;
 import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
+import org.gephi.partition.api.Part;
 import org.gephi.partition.api.Partition;
 import org.gephi.partition.api.PartitionController;
 import org.gephi.plugins.layout.noverlap.NoverlapLayout;
@@ -60,8 +63,8 @@ public class NetworkUtil {
 			n0.getAttributes().setValue("journal", artigo.getOndePub());
 			n0.getAttributes().setValue(
 					"keywords",
-					artigo.getKeywords() != null
-							&& artigo.getKeywords().equals("") ? "No Keyword"
+					artigo.getKeywords() == null
+							|| artigo.getKeywords().equals("") ? "No Keyword"
 							: artigo.getKeywords());
 			n0.getAttributes().setValue(
 					"authors",
@@ -176,11 +179,55 @@ public class NetworkUtil {
 		System.out.println("Quantidade de Comunidades Identificadas: "
 				+ p.getElementsCount());
 
+		System.out.println("Classificando cada comunidade pelas keywords");
+
+		for (Part pa : p.getParts()) {
+			Map<String, Integer> qteKeywordsComunidades = new HashMap<>();
+			for (Object obj : pa.getObjects()) {
+				Node node = (Node) obj;
+				String keywords = (String) node.getAttributes().getValue(
+						"keywords");
+				String keywordsArray[] = keywords.split(",");
+				for (String keyword : keywordsArray) {
+					if (!qteKeywordsComunidades.containsKey(keyword)) {
+						qteKeywordsComunidades.put(keyword, 1);
+					} else {
+						qteKeywordsComunidades.put(keyword,
+								1 + qteKeywordsComunidades.get(keyword));
+					}
+				}
+			}
+
+			System.out.println("keywords da Comunidade " + pa.getDisplayName()
+					+ ": ");
+			for (String key : qteKeywordsComunidades.keySet()) {
+				System.out.println(key + " " + qteKeywordsComunidades.get(key));
+			}
+		}
+
+		System.out
+				.println("## Calculando Evolução de publicações ao longo dos anos para cada comunidade ##");
+		for (Part pa : p.getParts()) {
+			Map<String, Integer> anoMap = new HashMap<String, Integer>();
+			for (Object obj : pa.getObjects()) {
+				Node node = (Node) obj;
+				String year = (String) node.getAttributes().getValue(
+						"year");
+				if (!anoMap.containsKey(year)) {
+					anoMap.put(year, 1);
+				} else {
+					anoMap.put(year, 1 + anoMap.get(year));
+				}
+			}
+			
+			System.out.println("Comunidade " + pa.getDisplayName()+ ": " + anoMap);
+		}
+
 		System.out.println("Distribuindo a Rede por YifanHU e Noverlap");
 		YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));
 		layout.setGraphModel(graphModel);
 		layout.resetPropertiesValues();
-		layout.setOptimalDistance(200f);
+		layout.setOptimalDistance(100f);
 
 		layout.initAlgo();
 		for (int i = 0; i < 100 && layout.canAlgo(); i++) {
