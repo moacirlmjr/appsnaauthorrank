@@ -17,7 +17,6 @@ import org.gephi.layout.plugin.force.StepDisplacement;
 import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
 import org.gephi.partition.api.Partition;
 import org.gephi.partition.api.PartitionController;
-import org.gephi.partition.plugin.NodeColorTransformer;
 import org.gephi.plugins.layout.noverlap.NoverlapLayout;
 import org.gephi.plugins.layout.noverlap.NoverlapLayoutBuilder;
 import org.gephi.project.api.ProjectController;
@@ -64,8 +63,10 @@ public class NetworkUtil {
 					artigo.getKeywords() != null
 							&& artigo.getKeywords().equals("") ? "No Keyword"
 							: artigo.getKeywords());
-			n0.getAttributes().setValue("authors",
-					artigo.getAutores() != null ? artigo.getAutores().toString() : "");
+			n0.getAttributes().setValue(
+					"authors",
+					artigo.getAutores() != null ? artigo.getAutores()
+							.toString() : "");
 
 			Graph graph = graphModel.getDirectedGraph();
 
@@ -95,7 +96,7 @@ public class NetworkUtil {
 					break;
 				}
 			}
-			if(artigo.getReferencia()!=null){
+			if (artigo.getReferencia() != null) {
 				for (Artigo referencia : artigo.getReferencia()) {
 					Node nodeReferencia = null;
 					for (Node n : graph.getNodes().toArray()) {
@@ -105,10 +106,10 @@ public class NetworkUtil {
 							break;
 						}
 					}
-					
+
 					if (nodeArtigo != null && nodeReferencia != null) {
 						Edge e1 = graphModel.factory().newEdge(nodeArtigo,
-								nodeReferencia, 0f, true);
+								nodeReferencia);
 						graph.addEdge(e1);
 					}
 				}
@@ -160,18 +161,20 @@ public class NetworkUtil {
 				Ranking.NODE_ELEMENT, column.getId());
 		rankingController.transform(ranking, sizeTransformer);
 
-		System.out.println("Particionando a Rede por Modularidade");
+		// System.out.println("Particionando a Rede por Modularidade");
 		column = attributeModel.getNodeTable().getColumn(
 				Modularity.MODULARITY_CLASS);
 
 		PartitionController partitionController = Lookup.getDefault().lookup(
 				PartitionController.class);
 		Partition p = partitionController.buildPartition(column, graph);
-		NodeColorTransformer nodeColorTransformer = new NodeColorTransformer();
-		nodeColorTransformer.randomizeColors(p);
-		partitionController.transform(p, nodeColorTransformer);
-		
-		System.out.println("Quantidade de Comunidades Identificadas: " + p.getElementsCount());
+		// NodeColorTransformer nodeColorTransformer = new
+		// NodeColorTransformer();
+		// nodeColorTransformer.randomizeColors(p);
+		// partitionController.transform(p, nodeColorTransformer);
+		//
+		System.out.println("Quantidade de Comunidades Identificadas: "
+				+ p.getElementsCount());
 
 		System.out.println("Distribuindo a Rede por YifanHU e Noverlap");
 		YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));

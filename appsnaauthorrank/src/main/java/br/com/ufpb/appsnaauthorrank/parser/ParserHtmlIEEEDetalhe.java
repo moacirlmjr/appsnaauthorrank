@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -19,11 +20,9 @@ import org.xml.sax.InputSource;
 
 import br.com.ufpb.appsnaauthorrank.beans.Artigo;
 import br.com.ufpb.appsnaauthorrank.beans.Autor;
-import br.com.ufpb.appsnaauthorrank.main.GerarGraphMLIEEEAllReferencies;
 import br.com.ufpb.appsnaauthorrank.post.PostFreeCiteApi;
 import br.com.ufpb.appsnaauthorrank.post.PostParaCiteApi;
 import br.com.ufpb.appsnaauthorrank.post.postIeeeForm;
-import br.com.ufpb.appsnaauthorrank.util.URLUtil;
 
 public class ParserHtmlIEEEDetalhe implements Callable<Artigo> {
 
@@ -293,24 +292,47 @@ public class ParserHtmlIEEEDetalhe implements Callable<Artigo> {
 
 			try {
 				String urlKeywords = "http://ieeexplore.ieee.org/xpl/downloadCitations?reload=true";
-				String numArtigo = artigo.getLinkDetalhe().split("&")[1].replace("arnumber=", "");
-				String params = "recordIds="+numArtigo+"&citations-format=citation-only&download-format=download-bibtex&x=93&y=11";
-				String bibtex = postIeeeForm.obterResultadoUrlPOST(urlKeywords, params);
+				String numArtigo = artigo.getLinkDetalhe().split("&")[1]
+						.replace("arnumber=", "");
+				String params = "recordIds="
+						+ numArtigo
+						+ "&citations-format=citation-only&download-format=download-bibtex&x=93&y=11";
+				String bibtex = postIeeeForm.obterResultadoUrlPOST(urlKeywords,
+						params);
 				artigo.setKeywords("");
-				
-				if(bibtex != null){
+
+				if (bibtex != null) {
 					String itensBibtex[] = bibtex.split("<br>");
-					for(String itemBibtex :itensBibtex){
-						if(itemBibtex.contains("keywords=")){
-							String keywords = itemBibtex.replace(" keywords=", "").replace("{", "").replace("}", "").replaceAll(";",",");
+					for (String itemBibtex : itensBibtex) {
+						if (itemBibtex.contains("keywords=")) {
+							String keywords = itemBibtex
+									.replace(" keywords=", "").replace("keywords=", "")
+									.replace("{ ", "").replace("{", "").replace("}", "")
+									.replaceAll(";", ",");
 							artigo.setKeywords(keywords);
+						} else if (itemBibtex.contains("author=")) {
+							String authors = itemBibtex.replace("author=", "").replace(" author=", "")
+									.replace("{", "").replace("{ ", "").replace("}", "")
+									.replaceAll(";", "");
+							Set<Autor> autorSet = new HashSet<Autor>();
+							for (String autor : authors.split(" and ")) {
+								Autor a = new Autor();
+								a.setNome(autor);
+								autorSet.add(a);
+							}
+							if (autorSet.size() > 0) {
+								artigo.setAutores(autorSet);
+							}
 						}
 					}
 				}
-				
-				System.out.println("Número de Keywords Identificadas para o artigo " + artigo.getTitulo() +": "
-						+ (artigo.getKeywords().equals("") ? 0 : artigo
-								.getKeywords().split(",").length));
+
+				System.out
+						.println("Número de Keywords Identificadas para o artigo "
+								+ artigo.getTitulo()
+								+ ": "
+								+ (artigo.getKeywords().equals("") ? 0 : artigo
+										.getKeywords().split(",").length));
 
 				String urlReferencias = artigo.getLinkDetalhe().replace(
 						"articleDetails", "abstractReferences");
@@ -328,7 +350,7 @@ public class ParserHtmlIEEEDetalhe implements Callable<Artigo> {
 									String paginaDetalheRef = postIeeeForm
 											.obterPagina(URL_IEEE
 													+ hrefReferencia, 0);
-									if(paginaDetalheRef != null){
+									if (paginaDetalheRef != null) {
 										Document docReferencia = Jsoup
 												.parse(paginaDetalheRef);
 										Elements title = docReferencia
@@ -339,8 +361,10 @@ public class ParserHtmlIEEEDetalhe implements Callable<Artigo> {
 													.text()
 													.toLowerCase()
 													.replace("(7043):814-8", "")
-													.replace(", 14333-14337. ", "")
-													.replaceAll("[^\\p{L}\\p{Z}]",
+													.replace(", 14333-14337. ",
+															"")
+													.replaceAll(
+															"[^\\p{L}\\p{Z}]",
 															"");
 											Artigo referencia = verificarReferenciaEmListaArtigos(referenciaText);
 											if (referencia != null) {
@@ -352,11 +376,14 @@ public class ParserHtmlIEEEDetalhe implements Callable<Artigo> {
 							}
 						}
 					}
-					
+
 					artigo.setReferencia(new HashSet<Artigo>(referencias));
 
-					System.out.println("Número de Citações Identificadas para o artigo " + artigo.getTitulo() +": "
-							+ artigo.getReferencia().size());
+					System.out
+							.println("Número de Citações Identificadas para o artigo "
+									+ artigo.getTitulo()
+									+ ": "
+									+ artigo.getReferencia().size());
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
