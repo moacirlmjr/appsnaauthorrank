@@ -51,6 +51,9 @@ public class PaperCrawlerMain {
 					.println("Quantidade de Páginas Encontradas: " + lastPage);
 
 			Map<Integer, Future<List<Artigo>>> mapArtigosRetornadosCall = new HashMap<>();
+			if (lastPage == null) {
+				lastPage = 1;
+			}
 			for (int i = 1; i <= lastPage; i++) {
 				ParserHtmlIEEE parser = new ParserHtmlIEEE();
 				parser.setQuery(query);
@@ -78,9 +81,9 @@ public class PaperCrawlerMain {
 					.println("######################### INICIANDO IDENTIFICAÇÃO DAS CITAÇÕES #########################");
 
 			System.out
-					.print("1- Citados entre Si (só irá buscar referências que também estiverem na lista de artigos iniciais) ");
+					.println("1- Citados entre Si (só irá buscar referências que também estiverem na lista de artigos iniciais) ");
 			System.out
-					.print("2- Todas Referências (Busca todas as referencias dos artigos encontrados inicialmente)");
+					.println("2- Todas Referências (Busca todas as referencias dos artigos encontrados inicialmente)");
 			System.out.print("Digite o Sua opção: ");
 			String opcao = sn.nextLine();
 
@@ -120,8 +123,9 @@ public class PaperCrawlerMain {
 				break;
 			case "2":
 				for (Artigo a : listArtigos) {
-					if (a.getTitulo() != null){
-						a = ParserHtmlIEEEDetalhe.realizarParserHtmlAllReferencies(a);
+					if (a.getTitulo() != null) {
+						a = ParserHtmlIEEEDetalhe
+								.realizarParserHtmlAllReferencies(a);
 						listAux.add(a);
 					}
 				}
@@ -179,7 +183,7 @@ public class PaperCrawlerMain {
 
 			// gerando rede de artigos
 			try {
-				NetworkUtil.gerarRedePublicacoes(listArtigos);
+				NetworkUtil.gerarRedePublicacoes(listAux);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
@@ -194,9 +198,9 @@ public class PaperCrawlerMain {
 					anoMap.put(a.getPubYear(), 1 + anoMap.get(a.getPubYear()));
 				}
 			}
-			//
-			// System.out.println("Evolução de publicações ao longo dos anos: "
-			// + anoMap);
+
+			System.out.println("Evolução de publicações ao longo dos anos: "
+					+ anoMap);
 
 			// try {
 			// criaCabecalhoAutor(true);

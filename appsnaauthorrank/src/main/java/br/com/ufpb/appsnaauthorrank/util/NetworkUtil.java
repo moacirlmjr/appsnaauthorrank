@@ -2,6 +2,9 @@ package br.com.ufpb.appsnaauthorrank.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +40,7 @@ import org.gephi.statistics.spi.Statistics;
 import org.openide.util.Lookup;
 
 import br.com.ufpb.appsnaauthorrank.beans.Artigo;
+import br.com.ufpb.appsnaauthorrank.beans.to.KeywordTO;
 
 public class NetworkUtil {
 
@@ -125,7 +129,7 @@ public class NetworkUtil {
 		System.out.println("Quantidade de Arestas da Rede: "
 				+ graph.getEdgeCount());
 		System.out
-				.println("Calculando Métricas: Centralidade de Grau, PageRank, Modularidade, Betweenness");
+				.println("\nCalculando Métricas: Centralidade de Grau, PageRank, Modularidade, Betweenness");
 		// Export full graph
 		AttributeModel attributeModel = Lookup.getDefault()
 				.lookup(AttributeController.class).getModel();
@@ -179,29 +183,62 @@ public class NetworkUtil {
 		System.out.println("Quantidade de Comunidades Identificadas: "
 				+ p.getElementsCount());
 
-		System.out.println("Classificando cada comunidade pelas keywords");
+		System.out.println("\nClassificando cada comunidade pelas keywords");
 
 		for (Part pa : p.getParts()) {
-			Map<String, Integer> qteKeywordsComunidades = new HashMap<>();
+			List<KeywordTO> qteKeywordsComunidades = new ArrayList<>();
 			for (Object obj : pa.getObjects()) {
 				Node node = (Node) obj;
 				String keywords = (String) node.getAttributes().getValue(
 						"keywords");
 				String keywordsArray[] = keywords.split(",");
-				for (String keyword : keywordsArray) {
-					if (!qteKeywordsComunidades.containsKey(keyword)) {
-						qteKeywordsComunidades.put(keyword, 1);
-					} else {
-						qteKeywordsComunidades.put(keyword,
-								1 + qteKeywordsComunidades.get(keyword));
+				for (String keywordName : keywordsArray) {
+					if (keywordName != null) {
+						KeywordTO kTO = new KeywordTO();
+						if (qteKeywordsComunidades.size() != 0) {
+							boolean teste = true;
+							for (KeywordTO to : qteKeywordsComunidades) {
+								if (to.getNome().equals(keywordName)) {
+									to.setQte(to.getQte() + 1);
+									teste = false;
+									break;
+								}
+							}
+
+							if (teste) {
+								kTO.setNome(keywordName);
+								kTO.setQte(1);
+								qteKeywordsComunidades.add(kTO);
+							}
+						} else {
+							kTO.setNome(keywordName);
+							kTO.setQte(1);
+							qteKeywordsComunidades.add(kTO);
+						}
 					}
 				}
 			}
 
-			System.out.println("keywords da Comunidade " + pa.getDisplayName()
+			System.err.println("\nkeywords da Comunidade " + pa.getDisplayName()
 					+ ": ");
-			for (String key : qteKeywordsComunidades.keySet()) {
-				System.out.println(key + " " + qteKeywordsComunidades.get(key));
+
+			Collections.sort(qteKeywordsComunidades,
+					new Comparator<KeywordTO>() {
+						@Override
+						public int compare(KeywordTO o1, KeywordTO o2) {
+							return o1.getQte() < o2.getQte() ? 1
+									: o1.getQte() > o2.getQte() ? -1 : 0;
+						}
+
+					});
+
+			int i = 0;
+			for (KeywordTO key : qteKeywordsComunidades) {
+				System.out.println(key.getNome() + " " + key.getQte());
+				if(i == 5){
+					break;
+				}
+				i++;
 			}
 		}
 
@@ -211,16 +248,16 @@ public class NetworkUtil {
 			Map<String, Integer> anoMap = new HashMap<String, Integer>();
 			for (Object obj : pa.getObjects()) {
 				Node node = (Node) obj;
-				String year = (String) node.getAttributes().getValue(
-						"year");
+				String year = (String) node.getAttributes().getValue("year");
 				if (!anoMap.containsKey(year)) {
 					anoMap.put(year, 1);
 				} else {
 					anoMap.put(year, 1 + anoMap.get(year));
 				}
 			}
-			
-			System.out.println("Comunidade " + pa.getDisplayName()+ ": " + anoMap);
+
+			System.out.println("Comunidade " + pa.getDisplayName() + ": "
+					+ anoMap);
 		}
 
 		System.out.println("Distribuindo a Rede por YifanHU e Noverlap");
