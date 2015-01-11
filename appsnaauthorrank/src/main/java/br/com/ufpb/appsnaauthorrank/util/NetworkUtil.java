@@ -219,7 +219,7 @@ public class NetworkUtil {
 				}
 			}
 
-			System.err.println("\nkeywords da Comunidade " + pa.getDisplayName()
+			System.out.println("\nkeywords da Comunidade " + pa.getDisplayName()
 					+ ": ");
 
 			Collections.sort(qteKeywordsComunidades,
