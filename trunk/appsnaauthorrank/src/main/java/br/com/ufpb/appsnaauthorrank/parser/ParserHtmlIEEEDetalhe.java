@@ -43,6 +43,51 @@ public class ParserHtmlIEEEDetalhe implements Callable<Artigo> {
 			Document doc = null;
 
 			try {
+				String urlKeywords = "http://ieeexplore.ieee.org/xpl/downloadCitations?reload=true";
+				String numArtigo = artigo.getLinkDetalhe().split("&")[1]
+						.replace("arnumber=", "");
+				String params = "recordIds="
+						+ numArtigo
+						+ "&citations-format=citation-only&download-format=download-bibtex&x=93&y=11";
+				String bibtex = postIeeeForm.obterResultadoUrlPOST(urlKeywords,
+						params);
+				artigo.setKeywords("");
+
+				if (bibtex != null) {
+					String itensBibtex[] = bibtex.split("<br>");
+					for (String itemBibtex : itensBibtex) {
+						if (itemBibtex.contains("keywords=")) {
+							String keywords = itemBibtex
+									.replace(" keywords=", "")
+									.replace("keywords=", "").replace("{ ", "")
+									.replace("{", "").replace("}", "")
+									.replaceAll(";", ",");
+							artigo.setKeywords(keywords);
+						} else if (itemBibtex.contains("author=")) {
+							String authors = itemBibtex.replace("author=", "")
+									.replace(" author=", "").replace("{", "")
+									.replace("{ ", "").replace("}", "")
+									.replaceAll(";", "");
+							Set<Autor> autorSet = new HashSet<Autor>();
+							for (String autor : authors.split(" and ")) {
+								Autor a = new Autor();
+								a.setNome(autor);
+								autorSet.add(a);
+							}
+							if (autorSet.size() > 0) {
+								artigo.setAutores(autorSet);
+							}
+						}
+					}
+				}
+
+				System.out
+						.println("Número de Keywords Identificadas para o artigo "
+								+ artigo.getTitulo()
+								+ ": "
+								+ (artigo.getKeywords().equals("") ? 0 : artigo
+										.getKeywords().split(",").length));
+
 				String urlReferencias = artigo.getLinkDetalhe().replace(
 						"articleDetails", "abstractReferences");
 				String pagina = postIeeeForm.obterPagina(URL_IEEE
@@ -306,13 +351,15 @@ public class ParserHtmlIEEEDetalhe implements Callable<Artigo> {
 					for (String itemBibtex : itensBibtex) {
 						if (itemBibtex.contains("keywords=")) {
 							String keywords = itemBibtex
-									.replace(" keywords=", "").replace("keywords=", "")
-									.replace("{ ", "").replace("{", "").replace("}", "")
+									.replace(" keywords=", "")
+									.replace("keywords=", "").replace("{ ", "")
+									.replace("{", "").replace("}", "")
 									.replaceAll(";", ",");
 							artigo.setKeywords(keywords);
 						} else if (itemBibtex.contains("author=")) {
-							String authors = itemBibtex.replace("author=", "").replace(" author=", "")
-									.replace("{", "").replace("{ ", "").replace("}", "")
+							String authors = itemBibtex.replace("author=", "")
+									.replace(" author=", "").replace("{", "")
+									.replace("{ ", "").replace("}", "")
 									.replaceAll(";", "");
 							Set<Autor> autorSet = new HashSet<Autor>();
 							for (String autor : authors.split(" and ")) {
