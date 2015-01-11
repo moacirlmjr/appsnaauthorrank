@@ -19,7 +19,7 @@ import br.com.ufpb.appsnaauthorrank.post.postIeeeForm;
 import br.com.ufpb.appsnaauthorrank.util.NetworkUtil;
 import br.com.ufpb.appsnaauthorrank.util.ValueComparator;
 
-public class GerarGraphMLIEEEAllCitadosEntreSi {
+public class PaperCrawlerMain {
 
 	private static final int ACTIVES_TASK = 2;
 	private static final int QTE_THREADS_EXEC = 50;
@@ -49,6 +49,7 @@ public class GerarGraphMLIEEEAllCitadosEntreSi {
 			int count = 0;
 			System.out
 					.println("Quantidade de Páginas Encontradas: " + lastPage);
+
 			Map<Integer, Future<List<Artigo>>> mapArtigosRetornadosCall = new HashMap<>();
 			for (int i = 1; i <= lastPage; i++) {
 				ParserHtmlIEEE parser = new ParserHtmlIEEE();
@@ -75,36 +76,59 @@ public class GerarGraphMLIEEEAllCitadosEntreSi {
 
 			System.out
 					.println("######################### INICIANDO IDENTIFICAÇÃO DAS CITAÇÕES #########################");
+
 			System.out
-					.println("* As citações consideradas só são aquelas que são indexadas pelo ieeexplorer e aparecem na lista de publicações iniciais");
-			List<Future<Artigo>> listArtigosCall = new LinkedList<>();
-			count = 0;
+					.print("1- Citados entre Si (só irá buscar referências que também estiverem na lista de artigos iniciais) ");
+			System.out
+					.print("2- Todas Referências (Busca todas as referencias dos artigos encontrados inicialmente)");
+			System.out.print("Digite o Sua opção: ");
+			String opcao = sn.nextLine();
+
 			List<Artigo> listAux = new LinkedList<Artigo>();
-			for (Artigo a : listArtigos) {
-				if (a.getTitulo() != null) {
-					ParserHtmlIEEEDetalhe parserDetalhe = new ParserHtmlIEEEDetalhe();
-					parserDetalhe.setArtigo(a);
-					parserDetalhe.setListArtigos(listArtigos);
-					Future<Artigo> artigoCall = exec.submit(parserDetalhe);
-					listArtigosCall.add(artigoCall);
+			switch (opcao) {
+			case "1":
+				System.out
+						.println("* As citações consideradas só são aquelas que são indexadas pelo ieeexplorer e aparecem na lista de publicações iniciais");
+				List<Future<Artigo>> listArtigosCall = new LinkedList<>();
+				count = 0;
+				for (Artigo a : listArtigos) {
+					if (a.getTitulo() != null) {
+						ParserHtmlIEEEDetalhe parserDetalhe = new ParserHtmlIEEEDetalhe();
+						parserDetalhe.setArtigo(a);
+						parserDetalhe.setListArtigos(listArtigos);
+						Future<Artigo> artigoCall = exec.submit(parserDetalhe);
+						listArtigosCall.add(artigoCall);
 
-					if ((count != 0 && count % QTE_THREADS_EXEC == 0)
-							|| (listArtigos.size() < QTE_THREADS_EXEC
-									&& count != 0 && count
-									% (listArtigos.size() - 1) == 0)
-							|| (listArtigos.size()) == (count + 1)) {
-						while (getQteThreadsRunning() != 0) {
-							Thread.sleep(100);
+						if ((count != 0 && count % QTE_THREADS_EXEC == 0)
+								|| (listArtigos.size() < QTE_THREADS_EXEC
+										&& count != 0 && count
+										% (listArtigos.size() - 1) == 0)
+								|| (listArtigos.size()) == (count + 1)) {
+							while (getQteThreadsRunning() != 0) {
+								Thread.sleep(100);
+							}
+
+							for (Future<Artigo> future : listArtigosCall) {
+								listAux.add(future.get());
+							}
+							listArtigosCall = new LinkedList<>();
 						}
 
-						for (Future<Artigo> future : listArtigosCall) {
-							listAux.add(future.get());
-						}
-						listArtigosCall = new LinkedList<>();
+						count++;
 					}
-
-					count++;
 				}
+				break;
+			case "2":
+				for (Artigo a : listArtigos) {
+					if (a.getTitulo() != null){
+						a = ParserHtmlIEEEDetalhe.realizarParserHtmlAllReferencies(a);
+						listAux.add(a);
+					}
+				}
+				break;
+			default:
+				System.out.println("Você não digitou a opção corretamente");
+				break;
 			}
 
 			// // ranking dos meios de publicação mais relevantes
@@ -170,8 +194,9 @@ public class GerarGraphMLIEEEAllCitadosEntreSi {
 					anoMap.put(a.getPubYear(), 1 + anoMap.get(a.getPubYear()));
 				}
 			}
-//			
-//			System.out.println("Evolução de publicações ao longo dos anos: " + anoMap);
+			//
+			// System.out.println("Evolução de publicações ao longo dos anos: "
+			// + anoMap);
 
 			// try {
 			// criaCabecalhoAutor(true);
