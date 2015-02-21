@@ -202,14 +202,11 @@ public class PaperCrawlerMain {
 			System.out.println("Evolução de publicações ao longo dos anos: "
 					+ anoMap);
 
-			// try {
-			// criaCabecalhoAutor(true);
-			// criarNodosAutor(artigos);
-			// criarArestasAutor(artigos);
-			// criaArquivo("C:\\Users\\Moacir\\Desktop\\ARS\\GrafoDeAutores2.graphml");
-			// } catch (Exception ex) {
-			// ex.printStackTrace();
-			// }
+			try {
+				NetworkUtil.gerarRedeCoautoria(listAux);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
 
 			System.out.println(new Date());
 			System.exit(0);

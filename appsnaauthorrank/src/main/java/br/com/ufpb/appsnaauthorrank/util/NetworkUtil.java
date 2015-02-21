@@ -40,6 +40,7 @@ import org.gephi.statistics.spi.Statistics;
 import org.openide.util.Lookup;
 
 import br.com.ufpb.appsnaauthorrank.beans.Artigo;
+import br.com.ufpb.appsnaauthorrank.beans.Autor;
 import br.com.ufpb.appsnaauthorrank.beans.to.KeywordTO;
 
 public class NetworkUtil {
@@ -219,8 +220,8 @@ public class NetworkUtil {
 				}
 			}
 
-			System.out.println("\nkeywords da Comunidade " + pa.getDisplayName()
-					+ ": ");
+			System.out.println("\nkeywords da Comunidade "
+					+ pa.getDisplayName() + ": ");
 
 			Collections.sort(qteKeywordsComunidades,
 					new Comparator<KeywordTO>() {
@@ -235,7 +236,7 @@ public class NetworkUtil {
 			int i = 0;
 			for (KeywordTO key : qteKeywordsComunidades) {
 				System.out.println(key.getNome() + " " + key.getQte());
-				if(i == 5){
+				if (i == 5) {
 					break;
 				}
 				i++;
@@ -288,6 +289,167 @@ public class NetworkUtil {
 				.lookup(ExportController.class);
 		ec.exportFile(new File(
 				"C:\\Users\\Moacir\\Desktop\\GrafoPaperCrawler.gexf"));
+
+	}
+
+	public static void gerarRedeCoautoria(List<Artigo> artigos)
+			throws Exception, IOException {
+		// Init a project - and therefore a workspace
+		ProjectController pc = Lookup.getDefault().lookup(
+				ProjectController.class);
+		pc.newProject();
+
+		GraphModel graphModel = Lookup.getDefault()
+				.lookup(GraphController.class).getModel();
+		System.out.println("\n\nIniciando Criação da Rede de Coautoria");
+		System.out.println("Criando Nós");
+		for (Artigo artigo : artigos) {
+			for (Autor autor : artigo.getAutores()) {
+				String idNode = autor.getNome();
+
+				Node n0 = graphModel.factory().newNode(idNode + "");
+				n0.getNodeData().setLabel(idNode);
+
+				Graph graph = graphModel.getUndirectedGraph();
+
+				boolean teste1 = true;
+				for (Node n : graph.getNodes().toArray()) {
+					if (((String) n.getAttributes().getValue("id"))
+							.equals(((String) n0.getAttributes().getValue("id")))) {
+						n0 = n;
+						teste1 = false;
+						break;
+					}
+				}
+
+				if (teste1) {
+					graph.addNode(n0);
+				}
+			}
+		}
+
+		System.out.println("Criando Arestas");
+		Graph graph = graphModel.getDirectedGraph();
+		for (Artigo artigo : artigos) {
+			for (Autor autor : artigo.getAutores()) {
+				Node nodeArtigo = null;
+				for (Node n : graph.getNodes().toArray()) {
+					if (((String) n.getAttributes().getValue("label"))
+							.equals(autor.getNome())) {
+						nodeArtigo = n;
+						break;
+					}
+				}
+
+				for (Autor autor2 : artigo.getAutores()) {
+					if (!autor2.getNome().equals(autor.getNome())) {
+						Node nodeReferencia = null;
+						for (Node n : graph.getNodes().toArray()) {
+							if (((String) n.getAttributes().getValue("label"))
+									.equals(autor2.getNome())) {
+								nodeReferencia = n;
+								break;
+							}
+						}
+
+						if (nodeArtigo != null && nodeReferencia != null) {
+							Edge e1 = graphModel.factory().newEdge(nodeArtigo,
+									nodeReferencia);
+							graph.addEdge(e1);
+						}
+					}
+				}
+			}
+
+		}
+
+		System.out
+				.println("Quantidade de Nós da Rede: " + graph.getNodeCount());
+		System.out.println("Quantidade de Arestas da Rede: "
+				+ graph.getEdgeCount());
+		System.out
+				.println("\nCalculando Métricas: Centralidade de Grau, PageRank, Modularidade, Betweenness");
+		// Export full graph
+		AttributeModel attributeModel = Lookup.getDefault()
+				.lookup(AttributeController.class).getModel();
+
+		GraphDistance distance = new GraphDistance();
+		distance.setDirected(true);
+		distance.execute(graphModel, attributeModel);
+
+		Statistics statistics = null;
+		DegreeBuilder dBuilder = new DegreeBuilder();
+		statistics = dBuilder.getStatistics();
+		statistics.execute(graphModel, attributeModel);
+
+		PageRankBuilder pgb = new PageRankBuilder();
+		statistics = pgb.getStatistics();
+		statistics.execute(graphModel, attributeModel);
+
+		ModularityBuilder mdb = new ModularityBuilder();
+		statistics = mdb.getStatistics();
+		statistics.execute(graphModel, attributeModel);
+
+		System.out.println("Realizando Ranking da Rede por PageRank");
+		RankingController rankingController = Lookup.getDefault().lookup(
+				RankingController.class);
+		AttributeColumn column = null;
+
+		column = attributeModel.getNodeTable().getColumn(PageRank.PAGERANK);
+
+		AbstractSizeTransformer sizeTransformer = (AbstractSizeTransformer) rankingController
+				.getModel().getTransformer(Ranking.NODE_ELEMENT,
+						Transformer.RENDERABLE_SIZE);
+		sizeTransformer.setMinSize(1);
+		sizeTransformer.setMaxSize(1000);
+
+		Ranking ranking = rankingController.getModel().getRanking(
+				Ranking.NODE_ELEMENT, column.getId());
+		rankingController.transform(ranking, sizeTransformer);
+
+		// System.out.println("Particionando a Rede por Modularidade");
+		column = attributeModel.getNodeTable().getColumn(
+				Modularity.MODULARITY_CLASS);
+
+		PartitionController partitionController = Lookup.getDefault().lookup(
+				PartitionController.class);
+		Partition p = partitionController.buildPartition(column, graph);
+		// NodeColorTransformer nodeColorTransformer = new
+		// NodeColorTransformer();
+		// nodeColorTransformer.randomizeColors(p);
+		// partitionController.transform(p, nodeColorTransformer);
+		//
+		System.out.println("Quantidade de Comunidades Identificadas: "
+				+ p.getElementsCount());
+
+		System.out.println("Distribuindo a Rede por YifanHU e Noverlap");
+		YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));
+		layout.setGraphModel(graphModel);
+		layout.resetPropertiesValues();
+		layout.setOptimalDistance(100f);
+
+		layout.initAlgo();
+		for (int i = 0; i < 100 && layout.canAlgo(); i++) {
+			layout.goAlgo();
+		}
+		layout.endAlgo();
+
+		NoverlapLayout layout2 = new NoverlapLayout(new NoverlapLayoutBuilder());
+		layout2.setGraphModel(graphModel);
+		layout2.resetPropertiesValues();
+
+		layout2.initAlgo();
+		for (int i = 0; i < 100 && layout2.canAlgo(); i++) {
+			layout2.goAlgo();
+		}
+		layout2.endAlgo();
+
+		System.out.println("Gerando GEXF");
+		// Export to GRaphml
+		ExportController ec = Lookup.getDefault()
+				.lookup(ExportController.class);
+		ec.exportFile(new File(
+				"C:\\Users\\Moacir\\Desktop\\GrafoPaperCrawlerCoautoria.gexf"));
 
 	}
 }
